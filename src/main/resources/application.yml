@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: glance-backend
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/glance
+    username: ${DB_USERNAME:ian}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  security:
+    user:
+      name: admin
+      password: admin
+
+server:
+  port: 8080
