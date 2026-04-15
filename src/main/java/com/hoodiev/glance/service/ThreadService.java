@@ -61,6 +61,8 @@ public class ThreadService {
                 .password(encodedPassword)
                 .gender(request.gender())
                 .tags(request.tags())
+                .animalLooks(request.animalLooks())
+                .vibeStyles(request.vibeStyles())
                 .build();
 
         Thread saved = threadRepository.save(thread);
@@ -68,7 +70,8 @@ public class ThreadService {
         return new ThreadCreateResponse(
                 saved.getId(), saved.getTitle(), saved.getContent(),
                 saved.getLatitude(), saved.getLongitude(), saved.getLocationName(),
-                saved.getGender(), saved.getTags(), saved.getLikeCount(), saved.getCommentCount(),
+                saved.getGender(), saved.getTags(), saved.getAnimalLooks(), saved.getVibeStyles(),
+                saved.getLikeCount(), saved.getCommentCount(),
                 saved.getCreatedAt(), generated ? rawPassword : null);
     }
 
@@ -108,7 +111,8 @@ public class ThreadService {
         return new ThreadDetailResponse(
                 thread.getId(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
-                thread.getGender(), thread.getTags(), thread.getLikeCount(), thread.getCommentCount(),
+                thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
+                thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt(), comments);
     }
 
@@ -155,7 +159,8 @@ public class ThreadService {
         return new ThreadListResponse(
                 thread.getId(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
-                thread.getGender(), thread.getTags(), thread.getLikeCount(), thread.getCommentCount(),
+                thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
+                thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt());
     }
 }

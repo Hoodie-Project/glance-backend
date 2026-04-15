@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "threads")
@@ -43,9 +45,25 @@ public class Thread {
     private Gender gender;
 
     @ElementCollection
-    @CollectionTable(name = "thread_tags", joinColumns = @JoinColumn(name = "thread_id"))
+    @CollectionTable(
+            name = "thread_tags",
+            joinColumns = @JoinColumn(name = "thread_id"),
+            indexes = @Index(name = "idx_thread_tags_tag", columnList = "tag")
+    )
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
+
+    @ElementCollection(targetClass = AnimalLook.class)
+    @CollectionTable(name = "thread_animal_looks", joinColumns = @JoinColumn(name = "thread_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "animal_look", length = 20)
+    private Set<AnimalLook> animalLooks = new HashSet<>();
+
+    @ElementCollection(targetClass = VibeStyle.class)
+    @CollectionTable(name = "thread_vibe_styles", joinColumns = @JoinColumn(name = "thread_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "vibe_style", length = 30)
+    private Set<VibeStyle> vibeStyles = new HashSet<>();
 
     @Column(nullable = false)
     private Integer likeCount = 0;
@@ -66,7 +84,8 @@ public class Thread {
 
     @Builder
     public Thread(String title, String content, Double latitude, Double longitude,
-                  String locationName, String password, Gender gender, List<String> tags) {
+                  String locationName, String password, Gender gender, List<String> tags,
+                  Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles) {
         this.title = title;
         this.content = content;
         this.latitude = latitude;
@@ -75,6 +94,8 @@ public class Thread {
         this.password = password;
         this.gender = gender;
         this.tags = tags != null ? tags : new ArrayList<>();
+        this.animalLooks = animalLooks != null ? animalLooks : new HashSet<>();
+        this.vibeStyles = vibeStyles != null ? vibeStyles : new HashSet<>();
     }
 
     public void softDelete() {

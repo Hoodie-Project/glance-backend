@@ -1,12 +1,15 @@
 package com.hoodiev.glance.dto.thread;
 
+import com.hoodiev.glance.domain.AnimalLook;
 import com.hoodiev.glance.domain.Gender;
+import com.hoodiev.glance.domain.VibeStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
+import java.util.Set;
 
 @Schema(description = "스레드 생성 요청")
 public record ThreadCreateRequest(
@@ -29,5 +32,11 @@ public record ThreadCreateRequest(
         @Size(min = 4, max = 8) String password,
 
         @Schema(description = "태그 리스트 (최대 5개)", example = "[\"홍대\",\"맛집\"]", nullable = true)
-        @Size(max = 5) List<@NotBlank String> tags
+        @Size(max = 5) List<@NotBlank String> tags,
+
+        @Schema(description = "힐끔 대상 동물상 (다중 선택)", example = "[\"DOG\",\"CAT\"]", nullable = true)
+        Set<AnimalLook> animalLooks,
+
+        @Schema(description = "힐끔 대상 분위기/스타일 (다중 선택)", example = "[\"COLD_HANDSOME\",\"DECADENT\"]", nullable = true)
+        Set<VibeStyle> vibeStyles
 ) {}

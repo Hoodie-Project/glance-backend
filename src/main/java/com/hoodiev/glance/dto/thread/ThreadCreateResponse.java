@@ -1,10 +1,13 @@
 package com.hoodiev.glance.dto.thread;
 
+import com.hoodiev.glance.domain.AnimalLook;
 import com.hoodiev.glance.domain.Gender;
+import com.hoodiev.glance.domain.VibeStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Schema(description = "스레드 생성 응답")
 public record ThreadCreateResponse(
@@ -31,6 +34,12 @@ public record ThreadCreateResponse(
 
         @Schema(description = "태그 리스트", example = "[\"홍대\",\"맛집\"]")
         List<String> tags,
+
+        @Schema(description = "힐끔 대상 동물상", example = "[\"DOG\",\"CAT\"]")
+        Set<AnimalLook> animalLooks,
+
+        @Schema(description = "힐끔 대상 분위기/스타일", example = "[\"COLD_HANDSOME\"]")
+        Set<VibeStyle> vibeStyles,
 
         @Schema(description = "좋아요 수", example = "0")
         Integer likeCount,
