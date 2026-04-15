@@ -62,6 +62,15 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             @Param("neLng") double neLng,
             @Param("gridSize") double gridSize);
 
+    @Query("""
+            SELECT DISTINCT t FROM Thread t
+            JOIN t.tags tag
+            WHERE tag = :tag
+              AND t.deletedAt IS NULL
+            ORDER BY t.createdAt DESC
+            """)
+    Page<Thread> searchByTag(@Param("tag") String tag, Pageable pageable);
+
     @Modifying
     @Query("UPDATE Thread t SET t.commentCount = t.commentCount + 1 WHERE t.id = :id")
     void incrementCommentCount(@Param("id") Long id);

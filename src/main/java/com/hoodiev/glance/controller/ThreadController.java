@@ -91,6 +91,22 @@ public class ThreadController {
     }
 
     @Operation(
+            summary = "해시태그로 스레드 검색",
+            description = """
+                    특정 태그가 달린 스레드를 최신순으로 조회합니다. 위치 무관.
+                    - `tag`: 정확 일치 (대소문자 구분). 클라이언트가 `#`을 제외하고 넘길 것.
+                    """)
+    @GetMapping("/search")
+    public Page<ThreadListResponse> searchByTag(
+            @Parameter(description = "검색할 태그", example = "홍대", required = true)
+            @RequestParam String tag,
+
+            @Parameter(description = "페이지네이션 (page, size=20 기본)")
+            @PageableDefault(size = 20) Pageable pageable) {
+        return threadService.searchByTag(tag, pageable);
+    }
+
+    @Operation(
             summary = "지도 클러스터 조회",
             description = """
                     bounding box(swLat/swLng ~ neLat/neLng) 내 스레드를 `zoomLevel` 기반 grid 셀로 묶어

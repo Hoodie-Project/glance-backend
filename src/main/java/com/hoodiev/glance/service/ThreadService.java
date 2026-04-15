@@ -83,6 +83,10 @@ public class ThreadService {
                 .map(this::toListResponse);
     }
 
+    public Page<ThreadListResponse> searchByTag(String tag, Pageable pageable) {
+        return threadRepository.searchByTag(tag, pageable).map(this::toListResponse);
+    }
+
     public List<ClusterResponse> getClusters(int zoomLevel, double swLat, double swLng,
                                              double neLat, double neLng) {
         double gridSize = 180.0 / Math.pow(2, Math.max(1, zoomLevel));
