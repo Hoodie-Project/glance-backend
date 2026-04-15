@@ -22,6 +22,9 @@ public class Thread {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 20)
+    private String nickname;
+
     @Column(nullable = false, length = 30)
     private String title;
 
@@ -83,9 +86,10 @@ public class Thread {
     }
 
     @Builder
-    public Thread(String title, String content, Double latitude, Double longitude,
+    public Thread(String nickname, String title, String content, Double latitude, Double longitude,
                   String locationName, String password, Gender gender, List<String> tags,
                   Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles) {
+        this.nickname = nickname;
         this.title = title;
         this.content = content;
         this.latitude = latitude;

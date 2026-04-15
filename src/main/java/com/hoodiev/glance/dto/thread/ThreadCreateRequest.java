@@ -13,6 +13,9 @@ import java.util.Set;
 
 @Schema(description = "스레드 생성 요청")
 public record ThreadCreateRequest(
+        @Schema(description = "작성자 닉네임 (최대 20자, 중복 허용)", example = "멋쟁이토마토", maxLength = 20, requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank @Size(max = 20) String nickname,
+
         @Schema(description = "제목 (최대 30자)", example = "홍대 뭐 먹지", maxLength = 30, requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank @Size(max = 30) String title,
 

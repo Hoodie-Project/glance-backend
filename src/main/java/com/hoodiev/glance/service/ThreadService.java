@@ -53,6 +53,7 @@ public class ThreadService {
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
         Thread thread = Thread.builder()
+                .nickname(request.nickname())
                 .title(request.title())
                 .content(request.content())
                 .latitude(request.latitude())
@@ -68,7 +69,7 @@ public class ThreadService {
         Thread saved = threadRepository.save(thread);
 
         return new ThreadCreateResponse(
-                saved.getId(), saved.getTitle(), saved.getContent(),
+                saved.getId(), saved.getNickname(), saved.getTitle(), saved.getContent(),
                 saved.getLatitude(), saved.getLongitude(), saved.getLocationName(),
                 saved.getGender(), saved.getTags(), saved.getAnimalLooks(), saved.getVibeStyles(),
                 saved.getLikeCount(), saved.getCommentCount(),
@@ -113,7 +114,7 @@ public class ThreadService {
                 .toList();
 
         return new ThreadDetailResponse(
-                thread.getId(), thread.getTitle(), thread.getContent(),
+                thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
                 thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
                 thread.getLikeCount(), thread.getCommentCount(),
@@ -161,7 +162,7 @@ public class ThreadService {
 
     private ThreadListResponse toListResponse(Thread thread) {
         return new ThreadListResponse(
-                thread.getId(), thread.getTitle(), thread.getContent(),
+                thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
                 thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
                 thread.getLikeCount(), thread.getCommentCount(),
