@@ -9,27 +9,25 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comments")
+@Table(
+        name = "thread_likes",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_thread_likes_thread_ip",
+                columnNames = {"thread_id", "ip_address"})
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Comment {
+public class ThreadLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "thread_id", nullable = false)
-    private Thread thread;
+    @Column(name = "thread_id", nullable = false)
+    private Long threadId;
 
-    @Column(nullable = false, length = 300)
-    private String content;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column
-    private Integer likeCount = 0;
+    @Column(name = "ip_address", nullable = false, length = 45)
+    private String ipAddress;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -40,9 +38,8 @@ public class Comment {
     }
 
     @Builder
-    public Comment(Thread thread, String content, String password) {
-        this.thread = thread;
-        this.content = content;
-        this.password = password;
+    public ThreadLike(Long threadId, String ipAddress) {
+        this.threadId = threadId;
+        this.ipAddress = ipAddress;
     }
 }

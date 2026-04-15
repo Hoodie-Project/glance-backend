@@ -38,6 +38,10 @@ public class Thread {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
+
     @ElementCollection
     @CollectionTable(name = "thread_tags", joinColumns = @JoinColumn(name = "thread_id"))
     @Column(name = "tag")
@@ -52,6 +56,9 @@ public class Thread {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private LocalDateTime deletedAt;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -59,13 +66,18 @@ public class Thread {
 
     @Builder
     public Thread(String title, String content, Double latitude, Double longitude,
-                  String locationName, String password, List<String> tags) {
+                  String locationName, String password, Gender gender, List<String> tags) {
         this.title = title;
         this.content = content;
         this.latitude = latitude;
         this.longitude = longitude;
         this.locationName = locationName;
         this.password = password;
+        this.gender = gender;
         this.tags = tags != null ? tags : new ArrayList<>();
+    }
+
+    public void softDelete() {
+        this.deletedAt = LocalDateTime.now();
     }
 }

@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: glance-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-glance}
+      POSTGRES_USER: ${DB_USERNAME:-glance}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-glance}
+    ports:
+      - "5435:5432"
+    volumes:
+      - glance-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-glance} -d ${POSTGRES_DB:-glance}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: glance-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-glance}
+      DB_USERNAME: ${DB_USERNAME:-glance}
+      DB_PASSWORD: ${DB_PASSWORD:-glance}
+      NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
+    ports:
+      - "8081:8080"
+
+volumes:
+  glance-postgres-data:
