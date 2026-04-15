@@ -32,16 +32,31 @@ public record ThreadListResponse(
         @Schema(description = "장소명", example = "서울특별시 마포구 서교동", nullable = true)
         String locationName,
 
-        @Schema(description = "힐끔 대상 성별", example = "FEMALE")
+        @Schema(description = "힐끔 대상 성별 (MALE: 남성, FEMALE: 여성)", example = "FEMALE", allowableValues = {"MALE", "FEMALE"})
         Gender gender,
 
-        @Schema(description = "태그 리스트", example = "[\"홍대\",\"맛집\"]")
+        @Schema(description = "해시태그 리스트 (각 태그는 #을 제외한 순수 문자열)", example = "[\"홍대\",\"카페\"]")
         List<String> tags,
 
-        @Schema(description = "힐끔 대상 동물상", example = "[\"DOG\",\"CAT\"]")
+        @Schema(
+                description = """
+                        동물상 (다중 선택).
+                        DOG=강아지, CAT=고양이, FOX=여우, RABBIT=토끼, DINOSAUR=공룡,
+                        DEER=사슴, WOLF=늑대, HAMSTER=햄스터, BEAR=곰돌이
+                        """,
+                example = "[\"DOG\",\"CAT\"]"
+        )
         Set<AnimalLook> animalLooks,
 
-        @Schema(description = "힐끔 대상 분위기/스타일", example = "[\"COLD_HANDSOME\"]")
+        @Schema(
+                description = """
+                        분위기/스타일 (다중 선택).
+                        COLD_HANDSOME=냉미남, COLD_BEAUTY=냉미녀, WARM_HANDSOME=온미남, WARM_BEAUTY=온미녀,
+                        HARMLESS=무해함, DECADENT=퇴폐미, CLASSIC_HANDSOME=정석미남,
+                        CLASSIC_BEAUTY=정석미녀, FRESH=과즙상
+                        """,
+                example = "[\"COLD_HANDSOME\",\"DECADENT\"]"
+        )
         Set<VibeStyle> vibeStyles,
 
         @Schema(description = "좋아요 수", example = "12")
