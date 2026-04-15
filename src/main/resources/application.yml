@@ -19,6 +19,12 @@ spring:
 server:
   port: 8080
 
+springdoc:
+  api-docs:
+    path: /api/v3/api-docs
+  swagger-ui:
+    path: /api/swagger-ui.html
+
 geocoding:
   naver:
     client-id: ${NAVER_CLIENT_ID:}
