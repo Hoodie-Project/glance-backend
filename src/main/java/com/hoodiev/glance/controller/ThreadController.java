@@ -6,6 +6,7 @@ import com.hoodiev.glance.dto.common.ErrorResponse;
 import com.hoodiev.glance.dto.common.LikeToggleResponse;
 import com.hoodiev.glance.dto.thread.ClusterResponse;
 import com.hoodiev.glance.dto.thread.RangeFilter;
+import com.hoodiev.glance.dto.thread.RegionMarkerResponse;
 import com.hoodiev.glance.dto.thread.ThreadCreateRequest;
 import com.hoodiev.glance.dto.thread.ThreadCreateResponse;
 import com.hoodiev.glance.dto.thread.ThreadDetailResponse;
@@ -52,7 +53,7 @@ public class ThreadController {
                     - `vibeStyles`: 분위기/스타일 다중 선택
 
                     ### 자동 처리
-                    - 네이버 Reverse Geocoding으로 `locationName` 자동 채움
+                    - 네이버 Reverse Geocoding으로 `region` (sido/sigungu/dong) 자동 채움
                     - `likeCount`, `commentCount`는 0으로 초기화
 
                     ### 제한
@@ -186,6 +187,43 @@ public class ThreadController {
             @Parameter(description = "bounding box 북동 경도", example = "126.95", required = true)
             @RequestParam double neLng) {
         return threadService.getClusters(zoomLevel, swLat, swLng, neLat, neLng);
+    }
+
+    @Operation(
+            summary = "지도 지역 마커 조회",
+            description = """
+                    지도 줌 레벨에 따라 시군구 또는 동 단위로 게시글 수와 마커 좌표를 반환합니다.
+
+                    ### level 파라미터
+                    - `sigungu`: 시군구 단위로 묶어서 반환 (지도 축소 상태)
+                    - `dong`: 동 단위로 묶어서 반환 (지도 확대 상태)
+
+                    ### 필터 파라미터
+                    - `sido`: 특정 시도 내로 제한 (선택). 미입력 시 전국 반환
+                    - `sigungu`: `level=dong` 일 때 특정 시군구 내로 제한 (선택)
+
+                    ### 마커 좌표 (lat, lng)
+                    해당 지역 내 게시글들의 위경도 평균값. 지도에 마커를 찍을 위치로 사용.
+
+                    ### 사용 예시
+                    - 지도 축소: `?level=sigungu&sido=서울특별시` → 마포구 5개, 강남구 12개 ...
+                    - 지도 확대: `?level=dong&sido=서울특별시&sigungu=강남구` → 역삼동 3개, 삼성동 9개 ...
+                    """)
+    @GetMapping("/map/regions")
+    public List<RegionMarkerResponse> regionMarkers(
+            @Parameter(
+                    description = "집계 단위. `sigungu` (시군구) 또는 `dong` (동)",
+                    example = "sigungu",
+                    schema = @Schema(allowableValues = {"sigungu", "dong"}, defaultValue = "sigungu")
+            )
+            @RequestParam(defaultValue = "sigungu") String level,
+
+            @Parameter(description = "시도 필터 (선택). 미입력 시 전국", example = "서울특별시")
+            @RequestParam(required = false) String sido,
+
+            @Parameter(description = "시군구 필터 (선택, level=dong 일 때 유효)", example = "강남구")
+            @RequestParam(required = false) String sigungu) {
+        return threadService.getRegionMarkers(level, sido, sigungu);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")
