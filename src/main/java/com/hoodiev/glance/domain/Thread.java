@@ -37,8 +37,9 @@ public class Thread {
     @Column(nullable = false)
     private Double longitude;
 
-    @Column(length = 100)
-    private String locationName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
 
     @Column(nullable = false)
     private String password;
@@ -87,14 +88,14 @@ public class Thread {
 
     @Builder
     public Thread(String nickname, String title, String content, Double latitude, Double longitude,
-                  String locationName, String password, Gender gender, List<String> tags,
+                  Region region, String password, Gender gender, List<String> tags,
                   Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles) {
         this.nickname = nickname;
         this.title = title;
         this.content = content;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.locationName = locationName;
+        this.region = region;
         this.password = password;
         this.gender = gender;
         this.tags = tags != null ? tags : new ArrayList<>();

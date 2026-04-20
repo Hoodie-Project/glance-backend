@@ -1,12 +1,15 @@
 package com.hoodiev.glance.service;
 
 import com.hoodiev.glance.domain.Gender;
+import com.hoodiev.glance.domain.LocationInfo;
+import com.hoodiev.glance.domain.Region;
 import com.hoodiev.glance.domain.Thread;
 import com.hoodiev.glance.domain.ThreadLike;
 import com.hoodiev.glance.dto.comment.CommentResponse;
 import com.hoodiev.glance.dto.common.LikeToggleResponse;
 import com.hoodiev.glance.dto.thread.ClusterResponse;
 import com.hoodiev.glance.dto.thread.RangeFilter;
+import com.hoodiev.glance.dto.thread.RegionResponse;
 import com.hoodiev.glance.dto.thread.ThreadCreateRequest;
 import com.hoodiev.glance.dto.thread.ThreadCreateResponse;
 import com.hoodiev.glance.dto.thread.ThreadDetailResponse;
@@ -15,6 +18,7 @@ import com.hoodiev.glance.exception.EntityNotFoundException;
 import com.hoodiev.glance.exception.InvalidPasswordException;
 import com.hoodiev.glance.exception.RateLimitExceededException;
 import com.hoodiev.glance.repository.CommentRepository;
+import com.hoodiev.glance.repository.RegionRepository;
 import com.hoodiev.glance.repository.ThreadLikeRepository;
 import com.hoodiev.glance.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +39,7 @@ public class ThreadService {
     private final ThreadRepository threadRepository;
     private final CommentRepository commentRepository;
     private final ThreadLikeRepository threadLikeRepository;
+    private final RegionRepository regionRepository;
     private final GeocodingService geocodingService;
     private final RateLimiter rateLimiter;
     private final PasswordGenerator passwordGenerator;
@@ -46,7 +51,8 @@ public class ThreadService {
             throw new RateLimitExceededException();
         }
 
-        String locationName = geocodingService.reverseGeocode(request.latitude(), request.longitude());
+        LocationInfo location = geocodingService.reverseGeocode(request.latitude(), request.longitude());
+        Region region = findOrCreateRegion(location);
 
         boolean generated = request.password() == null || request.password().isBlank();
         String rawPassword = generated ? passwordGenerator.generate() : request.password();
@@ -58,7 +64,7 @@ public class ThreadService {
                 .content(request.content())
                 .latitude(request.latitude())
                 .longitude(request.longitude())
-                .locationName(locationName)
+                .region(region)
                 .password(encodedPassword)
                 .gender(request.gender())
                 .tags(request.tags())
@@ -70,7 +76,8 @@ public class ThreadService {
 
         return new ThreadCreateResponse(
                 saved.getId(), saved.getNickname(), saved.getTitle(), saved.getContent(),
-                saved.getLatitude(), saved.getLongitude(), saved.getLocationName(),
+                saved.getLatitude(), saved.getLongitude(),
+                RegionResponse.from(saved.getRegion()),
                 saved.getGender(), saved.getTags(), saved.getAnimalLooks(), saved.getVibeStyles(),
                 saved.getLikeCount(), saved.getCommentCount(),
                 saved.getCreatedAt(), generated ? rawPassword : null);
@@ -115,7 +122,8 @@ public class ThreadService {
 
         return new ThreadDetailResponse(
                 thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
-                thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
+                thread.getLatitude(), thread.getLongitude(),
+                RegionResponse.from(thread.getRegion()),
                 thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
                 thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt(), comments);
@@ -160,10 +168,21 @@ public class ThreadService {
         thread.softDelete();
     }
 
+    private Region findOrCreateRegion(LocationInfo location) {
+        if (location == null) return null;
+        return regionRepository.findBySidoAndSigunguAndDong(location.sido(), location.sigungu(), location.dong())
+                .orElseGet(() -> regionRepository.save(Region.builder()
+                        .sido(location.sido())
+                        .sigungu(location.sigungu())
+                        .dong(location.dong())
+                        .build()));
+    }
+
     private ThreadListResponse toListResponse(Thread thread) {
         return new ThreadListResponse(
                 thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
-                thread.getLatitude(), thread.getLongitude(), thread.getLocationName(),
+                thread.getLatitude(), thread.getLongitude(),
+                RegionResponse.from(thread.getRegion()),
                 thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
                 thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt());

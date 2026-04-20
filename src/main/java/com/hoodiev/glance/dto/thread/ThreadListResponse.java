@@ -29,8 +29,8 @@ public record ThreadListResponse(
         @Schema(description = "경도", example = "126.9236")
         Double longitude,
 
-        @Schema(description = "장소명", example = "서울특별시 마포구 서교동", nullable = true)
-        String locationName,
+        @Schema(description = "지역 정보 (역지오코딩 실패 시 null)", nullable = true)
+        RegionResponse region,
 
         @Schema(description = "힐끔 대상 성별 (MALE: 남성, FEMALE: 여성)", example = "FEMALE", allowableValues = {"MALE", "FEMALE"})
         Gender gender,

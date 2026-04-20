@@ -1,5 +1,6 @@
 package com.hoodiev.glance.service;
 
+import com.hoodiev.glance.domain.LocationInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -26,7 +27,7 @@ public class GeocodingService {
     }
 
     @SuppressWarnings("unchecked")
-    public String reverseGeocode(double latitude, double longitude) {
+    public LocationInfo reverseGeocode(double latitude, double longitude) {
         if (clientId == null || clientId.isBlank()) {
             log.warn("Naver API key is not configured, skipping reverse geocoding");
             return null;
@@ -36,7 +37,7 @@ public class GeocodingService {
             String coords = longitude + "," + latitude;
 
             Map<String, Object> response = restClient.get()
-                    .uri("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords={coords}&output=json&orders=roadaddr,addr",
+                    .uri("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords={coords}&output=json&orders=addr",
                             coords)
                     .header("X-NCP-APIGW-API-KEY-ID", clientId)
                     .header("X-NCP-APIGW-API-KEY", clientSecret)
@@ -47,10 +48,14 @@ public class GeocodingService {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
                 if (!results.isEmpty()) {
                     Map<String, Object> region = (Map<String, Object>) results.get(0).get("region");
-                    String area1 = ((Map<String, String>) region.get("area1")).get("name");
-                    String area2 = ((Map<String, String>) region.get("area2")).get("name");
-                    String area3 = ((Map<String, String>) region.get("area3")).get("name");
-                    return area1 + " " + area2 + " " + area3;
+                    String sido = trim((String) ((Map<?, ?>) region.get("area1")).get("name"));
+                    String sigungu = trim((String) ((Map<?, ?>) region.get("area2")).get("name"));
+                    String dong = trim((String) ((Map<?, ?>) region.get("area3")).get("name"));
+
+                    if (sido.isBlank() || sigungu.isBlank() || dong.isBlank()) {
+                        return null;
+                    }
+                    return new LocationInfo(sido, sigungu, dong);
                 }
             }
         } catch (Exception e) {
@@ -58,5 +63,9 @@ public class GeocodingService {
         }
 
         return null;
+    }
+
+    private String trim(String value) {
+        return value == null ? "" : value.trim();
     }
 }
