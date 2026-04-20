@@ -9,6 +9,7 @@ import com.hoodiev.glance.dto.comment.CommentResponse;
 import com.hoodiev.glance.dto.common.LikeToggleResponse;
 import com.hoodiev.glance.dto.thread.ClusterResponse;
 import com.hoodiev.glance.dto.thread.RangeFilter;
+import com.hoodiev.glance.dto.thread.RegionMarkerResponse;
 import com.hoodiev.glance.dto.thread.RegionResponse;
 import com.hoodiev.glance.dto.thread.ThreadCreateRequest;
 import com.hoodiev.glance.dto.thread.ThreadCreateResponse;
@@ -103,6 +104,29 @@ public class ThreadService {
                         ((Number) row[0]).doubleValue(),
                         ((Number) row[1]).doubleValue(),
                         ((Number) row[2]).longValue()))
+                .toList();
+    }
+
+    public List<RegionMarkerResponse> getRegionMarkers(String level, String sido, String sigungu) {
+        if ("dong".equalsIgnoreCase(level)) {
+            return threadRepository.findMarkersByDong(sido, sigungu).stream()
+                    .map(row -> new RegionMarkerResponse(
+                            (String) row[0],
+                            (String) row[1],
+                            (String) row[2],
+                            ((Number) row[3]).longValue(),
+                            ((Number) row[4]).doubleValue(),
+                            ((Number) row[5]).doubleValue()))
+                    .toList();
+        }
+        return threadRepository.findMarkersBySigungu(sido).stream()
+                .map(row -> new RegionMarkerResponse(
+                        (String) row[0],
+                        (String) row[1],
+                        null,
+                        ((Number) row[3]).longValue(),
+                        ((Number) row[4]).doubleValue(),
+                        ((Number) row[5]).doubleValue()))
                 .toList();
     }
 

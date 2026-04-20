@@ -71,6 +71,29 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             """)
     Page<Thread> searchByTag(@Param("tag") String tag, Pageable pageable);
 
+    @Query(value = """
+            SELECT r.sido, r.sigungu, NULL as dong,
+                   COUNT(t.id) as cnt, AVG(t.latitude) as lat, AVG(t.longitude) as lng
+            FROM threads t
+            JOIN regions r ON t.region_id = r.id
+            WHERE t.deleted_at IS NULL
+              AND (CAST(:sido AS VARCHAR) IS NULL OR r.sido = :sido)
+            GROUP BY r.sido, r.sigungu
+            """, nativeQuery = true)
+    List<Object[]> findMarkersBySigungu(@Param("sido") String sido);
+
+    @Query(value = """
+            SELECT r.sido, r.sigungu, r.dong,
+                   COUNT(t.id) as cnt, AVG(t.latitude) as lat, AVG(t.longitude) as lng
+            FROM threads t
+            JOIN regions r ON t.region_id = r.id
+            WHERE t.deleted_at IS NULL
+              AND (CAST(:sido AS VARCHAR) IS NULL OR r.sido = :sido)
+              AND (CAST(:sigungu AS VARCHAR) IS NULL OR r.sigungu = :sigungu)
+            GROUP BY r.sido, r.sigungu, r.dong
+            """, nativeQuery = true)
+    List<Object[]> findMarkersByDong(@Param("sido") String sido, @Param("sigungu") String sigungu);
+
     @Modifying
     @Query("UPDATE Thread t SET t.commentCount = t.commentCount + 1 WHERE t.id = :id")
     void incrementCommentCount(@Param("id") Long id);
