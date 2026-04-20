@@ -41,7 +41,7 @@ public record ThreadCreateRequest(
         @NotBlank @Size(max = 500) String content,
 
         @Schema(
-                description = "작성자 현재 위치의 위도 (WGS84). 필수. 네이버 Reverse Geocoding으로 `locationName` 자동 채움.",
+                description = "작성자 현재 위치의 위도 (WGS84). 필수. 네이버 Reverse Geocoding으로 지역 정보 자동 채움.",
                 example = "37.5563",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
