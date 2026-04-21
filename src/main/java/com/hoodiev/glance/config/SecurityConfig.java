@@ -23,7 +23,7 @@ public class SecurityConfig {
                                                 @Value("${admin.username}") String adminUsername,
                                                 @Value("${admin.password}") String adminPassword) throws Exception {
         http
-                .securityMatcher("/admin/**")
+                .securityMatcher("/admin", "/admin/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("ADMIN"))
                 .formLogin(form -> form
                         .loginPage("/admin/login")
