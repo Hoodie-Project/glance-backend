@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head th:replace="~{admin/layout :: head('게시글 관리')}"></head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div th:replace="~{admin/layout :: sidebar('threads')}"></div>
+
+        <div class="col-10 p-4">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h4 class="fw-bold mb-0">게시글 관리</h4>
+            </div>
+
+            <div th:if="${message}" class="alert alert-success alert-dismissible fade show mb-4">
+                <span th:text="${message}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- 검색 / 필터 -->
+            <form method="get" action="/admin/threads" class="card border-0 shadow-sm mb-4">
+                <div class="card-body d-flex gap-2">
+                    <input type="text" name="keyword" class="form-control" placeholder="제목 검색"
+                           th:value="${keyword}">
+                    <div class="form-check form-switch d-flex align-items-center ms-2 text-nowrap">
+                        <input class="form-check-input me-2" type="checkbox" name="showDeleted" value="true"
+                               th:checked="${showDeleted}" id="showDeleted">
+                        <label class="form-check-label" for="showDeleted">삭제된 글 포함</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary text-nowrap">검색</button>
+                    <a href="/admin/threads" class="btn btn-outline-secondary text-nowrap">초기화</a>
+                </div>
+            </form>
+
+            <!-- 목록 -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>제목</th>
+                                <th>닉네임</th>
+                                <th>지역</th>
+                                <th>좋아요</th>
+                                <th>댓글</th>
+                                <th>작성일</th>
+                                <th>상태</th>
+                                <th>액션</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="thread : ${threads}" th:classappend="${thread.deletedAt != null} ? 'table-danger'">
+                                <td th:text="${thread.id}"></td>
+                                <td>
+                                    <a th:href="@{/admin/threads/{id}(id=${thread.id})}"
+                                       th:text="${thread.title}"
+                                       class="text-decoration-none fw-semibold"></a>
+                                </td>
+                                <td th:text="${thread.nickname}"></td>
+                                <td>
+                                    <span th:if="${thread.region != null}"
+                                          th:text="${thread.region.sigungu + ' ' + thread.region.dong}"
+                                          class="small text-muted"></span>
+                                    <span th:unless="${thread.region != null}" class="text-muted small">-</span>
+                                </td>
+                                <td th:text="${thread.likeCount}"></td>
+                                <td th:text="${thread.commentCount}"></td>
+                                <td th:text="${#temporals.format(thread.createdAt, 'MM-dd HH:mm')}" class="small text-muted"></td>
+                                <td>
+                                    <span th:if="${thread.deletedAt != null}" class="badge bg-danger">삭제됨</span>
+                                    <span th:unless="${thread.deletedAt != null}" class="badge bg-success">활성</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <form th:if="${thread.deletedAt != null}"
+                                              th:action="@{/admin/threads/{id}/restore(id=${thread.id})}" method="post">
+                                            <button type="submit" class="btn btn-xs btn-sm btn-outline-success py-0 px-2">복구</button>
+                                        </form>
+                                        <form th:action="@{/admin/threads/{id}/delete(id=${thread.id})}" method="post"
+                                              onsubmit="return confirm('완전 삭제하시겠습니까?')">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2">삭제</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${threads.isEmpty()}">
+                                <td colspan="9" class="text-center text-muted py-4">게시글이 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <nav th:if="${threads.totalPages > 1}" class="mt-3">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${threads.first} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/threads(page=${threads.number - 1}, keyword=${keyword}, showDeleted=${showDeleted})}">이전</a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, threads.totalPages - 1)}"
+                        th:classappend="${i == threads.number} ? 'active'">
+                        <a class="page-link" th:href="@{/admin/threads(page=${i}, keyword=${keyword}, showDeleted=${showDeleted})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${threads.last} ? 'disabled'">
+                        <a class="page-link" th:href="@{/admin/threads(page=${threads.number + 1}, keyword=${keyword}, showDeleted=${showDeleted})}">다음</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

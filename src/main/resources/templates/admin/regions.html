@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head th:replace="~{admin/layout :: head('지역 현황')}"></head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div th:replace="~{admin/layout :: sidebar('regions')}"></div>
+
+        <div class="col-10 p-4">
+            <h4 class="fw-bold mb-4">지역 현황</h4>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:60px">ID</th>
+                                <th>시도</th>
+                                <th>시군구</th>
+                                <th>동</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="region : ${regions}">
+                                <td th:text="${region.id}" class="text-muted small"></td>
+                                <td th:text="${region.sido}"></td>
+                                <td th:text="${region.sigungu}"></td>
+                                <td th:text="${region.dong}"></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(regions)}">
+                                <td colspan="4" class="text-center text-muted py-4">지역 데이터가 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

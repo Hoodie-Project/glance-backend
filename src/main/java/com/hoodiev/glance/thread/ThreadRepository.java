@@ -3,6 +3,8 @@ package com.hoodiev.glance.thread;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.time.LocalDateTime;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -92,6 +94,16 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             ORDER BY t.createdAt DESC
             """)
     Page<Thread> searchByTag(@Param("tag") String tag, Pageable pageable);
+
+    long countByDeletedAtIsNull();
+
+    long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
+
+    Page<Thread> findByDeletedAtIsNull(Pageable pageable);
+
+    Page<Thread> findAllByTitleContainingIgnoreCase(String keyword, Pageable pageable);
+
+    Page<Thread> findByTitleContainingIgnoreCaseAndDeletedAtIsNull(String keyword, Pageable pageable);
 
     @Modifying
     @Query("UPDATE Thread t SET t.commentCount = t.commentCount + 1 WHERE t.id = :id")
