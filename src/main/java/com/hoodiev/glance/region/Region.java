@@ -7,10 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(
-        name = "regions",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"sido", "sigungu", "dong"})
-)
+@Table(name = "regions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Region {
@@ -18,6 +15,9 @@ public class Region {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, unique = true, length = 20)
+    private String legalCode;
 
     @Column(nullable = false, length = 20)
     private String sido;
@@ -29,7 +29,14 @@ public class Region {
     private String dong;
 
     @Builder
-    public Region(String sido, String sigungu, String dong) {
+    public Region(String legalCode, String sido, String sigungu, String dong) {
+        this.legalCode = legalCode;
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.dong = dong;
+    }
+
+    public void updateNames(String sido, String sigungu, String dong) {
         this.sido = sido;
         this.sigungu = sigungu;
         this.dong = dong;

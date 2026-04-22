@@ -36,7 +36,7 @@ public class GeocodingService {
             String coords = longitude + "," + latitude;
 
             Map<String, Object> response = restClient.get()
-                    .uri("https://naveropenapi.apigw.ntruss.com/map-reversegeocode/v2/gc?coords={coords}&output=json&orders=addr",
+                    .uri("https://maps.apigw.ntruss.com/map-reversegeocode/v2/gc?coords={coords}&output=json&orders=addr",
                             coords)
                     .header("X-NCP-APIGW-API-KEY-ID", clientId)
                     .header("X-NCP-APIGW-API-KEY", clientSecret)
@@ -46,15 +46,19 @@ public class GeocodingService {
             if (response != null && response.containsKey("results")) {
                 List<Map<String, Object>> results = (List<Map<String, Object>>) response.get("results");
                 if (!results.isEmpty()) {
-                    Map<String, Object> region = (Map<String, Object>) results.get(0).get("region");
+                    Map<String, Object> result = results.get(0);
+                    Map<String, Object> code = (Map<String, Object>) result.get("code");
+                    Map<String, Object> region = (Map<String, Object>) result.get("region");
+
+                    String legalCode = String.valueOf(code.get("id"));
                     String sido = trim((String) ((Map<?, ?>) region.get("area1")).get("name"));
                     String sigungu = trim((String) ((Map<?, ?>) region.get("area2")).get("name"));
                     String dong = trim((String) ((Map<?, ?>) region.get("area3")).get("name"));
 
-                    if (sido.isBlank() || sigungu.isBlank() || dong.isBlank()) {
+                    if (legalCode.isBlank() || sido.isBlank() || sigungu.isBlank() || dong.isBlank()) {
                         return null;
                     }
-                    return new LocationInfo(sido, sigungu, dong);
+                    return new LocationInfo(legalCode, sido, sigungu, dong);
                 }
             }
         } catch (Exception e) {

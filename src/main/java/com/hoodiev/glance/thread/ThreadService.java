@@ -192,8 +192,17 @@ public class ThreadService {
 
     private Region findOrCreateRegion(LocationInfo location) {
         if (location == null) return null;
-        return regionRepository.findBySidoAndSigunguAndDong(location.sido(), location.sigungu(), location.dong())
+        return regionRepository.findByLegalCode(location.legalCode())
+                .map(region -> {
+                    if (!region.getSido().equals(location.sido())
+                            || !region.getSigungu().equals(location.sigungu())
+                            || !region.getDong().equals(location.dong())) {
+                        region.updateNames(location.sido(), location.sigungu(), location.dong());
+                    }
+                    return region;
+                })
                 .orElseGet(() -> regionRepository.save(Region.builder()
+                        .legalCode(location.legalCode())
                         .sido(location.sido())
                         .sigungu(location.sigungu())
                         .dong(location.dong())
