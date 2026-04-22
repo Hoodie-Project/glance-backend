@@ -15,6 +15,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width:60px">ID</th>
+                                <th style="width:120px">법정동 코드</th>
                                 <th>시도</th>
                                 <th>시군구</th>
                                 <th>동</th>
@@ -23,12 +24,13 @@
                         <tbody>
                             <tr th:each="region : ${regions}">
                                 <td th:text="${region.id}" class="text-muted small"></td>
+                                <td th:text="${region.legalCode}" class="text-muted small"></td>
                                 <td th:text="${region.sido}"></td>
                                 <td th:text="${region.sigungu}"></td>
                                 <td th:text="${region.dong}"></td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(regions)}">
-                                <td colspan="4" class="text-center text-muted py-4">지역 데이터가 없습니다.</td>
+                                <td colspan="5" class="text-center text-muted py-4">지역 데이터가 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>
