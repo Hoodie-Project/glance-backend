@@ -21,6 +21,7 @@ import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
 import com.hoodiev.glance.thread.dto.ThreadDetailResponse;
 import com.hoodiev.glance.thread.dto.ThreadListResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -105,6 +106,7 @@ public class ThreadService {
                 .toList();
     }
 
+    @Cacheable(value = "regionMarkers", key = "#level + ':' + #sido + ':' + #sigungu")
     public List<RegionMarkerResponse> getRegionMarkers(String level, String sido, String sigungu) {
         if ("dong".equalsIgnoreCase(level)) {
             return threadRepository.findMarkersByDong(sido, sigungu).stream()

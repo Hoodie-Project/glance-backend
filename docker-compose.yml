@@ -16,20 +16,32 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: glance-redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - glance-redis-data:/data
+
   app:
     build: .
     container_name: glance-app
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-glance}
       DB_USERNAME: ${DB_USERNAME:-glance}
       DB_PASSWORD: ${DB_PASSWORD:-glance}
       NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
+      REDIS_HOST: redis
     ports:
       - "8081:8080"
 
 volumes:
   glance-postgres-data:
+  glance-redis-data:
