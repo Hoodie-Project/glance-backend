@@ -51,8 +51,13 @@ public class AdminService {
     }
 
     public Thread getThread(Long id) {
-        return threadRepository.findById(id)
+        Thread thread = threadRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Thread not found: " + id));
+        thread.getTags().size();
+        thread.getAnimalLooks().size();
+        thread.getVibeStyles().size();
+        if (thread.getRegion() != null) thread.getRegion().getSido();
+        return thread;
     }
 
     public List<Comment> getCommentsByThread(Long threadId) {

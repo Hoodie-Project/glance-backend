@@ -18,7 +18,7 @@
                                 <i class="bi bi-chat-square-text fs-4 text-primary"></i>
                             </div>
                             <div>
-                                <div class="text-muted small">전체 게시글</div>
+                                <div class="text-muted small">전체 스레드</div>
                                 <div class="fw-bold fs-4" th:text="${stats.totalThreads()}">0</div>
                             </div>
                         </div>
@@ -31,7 +31,7 @@
                                 <i class="bi bi-check-circle fs-4 text-success"></i>
                             </div>
                             <div>
-                                <div class="text-muted small">활성 게시글</div>
+                                <div class="text-muted small">활성 스레드</div>
                                 <div class="fw-bold fs-4" th:text="${stats.activeThreads()}">0</div>
                             </div>
                         </div>
@@ -44,7 +44,7 @@
                                 <i class="bi bi-trash fs-4 text-danger"></i>
                             </div>
                             <div>
-                                <div class="text-muted small">삭제된 게시글</div>
+                                <div class="text-muted small">삭제된 스레드</div>
                                 <div class="fw-bold fs-4" th:text="${stats.deletedThreads()}">0</div>
                             </div>
                         </div>
@@ -83,7 +83,7 @@
                                 <i class="bi bi-calendar-day fs-4 text-secondary"></i>
                             </div>
                             <div>
-                                <div class="text-muted small">오늘 게시글</div>
+                                <div class="text-muted small">오늘 스레드</div>
                                 <div class="fw-bold fs-4" th:text="${stats.todayThreads()}">0</div>
                             </div>
                         </div>
@@ -97,7 +97,7 @@
                     <a href="/admin/threads" class="card border-0 shadow-sm text-decoration-none text-dark">
                         <div class="card-body text-center py-4">
                             <i class="bi bi-chat-square-text fs-2 text-primary mb-2"></i>
-                            <div class="fw-semibold">게시글 관리</div>
+                            <div class="fw-semibold">스레드 관리</div>
                         </div>
                     </a>
                 </div>

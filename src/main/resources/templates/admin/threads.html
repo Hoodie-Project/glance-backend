@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{admin/layout :: head('게시글 관리')}"></head>
+<head th:replace="~{admin/layout :: head('스레드 관리')}"></head>
 <body>
 <div class="container-fluid">
     <div class="row">
@@ -8,7 +8,7 @@
 
         <div class="col-10 p-4">
             <div class="d-flex align-items-center justify-content-between mb-4">
-                <h4 class="fw-bold mb-0">게시글 관리</h4>
+                <h4 class="fw-bold mb-0">스레드 관리</h4>
             </div>
 
             <div th:if="${message}" class="alert alert-success alert-dismissible fade show mb-4">
@@ -84,7 +84,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${threads.isEmpty()}">
-                                <td colspan="9" class="text-center text-muted py-4">게시글이 없습니다.</td>
+                                <td colspan="9" class="text-center text-muted py-4">스레드가 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{admin/layout :: head('게시글 상세')}"></head>
+<head th:replace="~{admin/layout :: head('스레드 상세')}"></head>
 <body>
 <div class="container-fluid">
     <div class="row">
@@ -11,15 +11,15 @@
                 <a href="/admin/threads" class="btn btn-sm btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> 목록
                 </a>
-                <h4 class="fw-bold mb-0">게시글 상세</h4>
+                <h4 class="fw-bold mb-0">스레드 상세</h4>
                 <span th:if="${thread.deletedAt != null}" class="badge bg-danger">삭제됨</span>
             </div>
 
             <div class="row g-4">
-                <!-- 게시글 정보 -->
+                <!-- 스레드 정보 -->
                 <div class="col-md-8">
                     <div class="card border-0 shadow-sm mb-4">
-                        <div class="card-header bg-white fw-semibold">게시글 내용</div>
+                        <div class="card-header bg-white fw-semibold">스레드 내용</div>
                         <div class="card-body">
                             <dl class="row mb-0">
                                 <dt class="col-3 text-muted">ID</dt>
@@ -53,8 +53,8 @@
                                 <dd class="col-9" th:text="${thread.commentCount}"></dd>
                                 <dt class="col-3 text-muted">작성 IP</dt>
                                 <dd class="col-9 font-monospace small" th:text="${thread.clientIp != null ? thread.clientIp : '-'}"></dd>
-                                <dt class="col-3 text-muted">User-Agent</dt>
-                                <dd class="col-9 small text-break" th:text="${thread.userAgent != null ? thread.userAgent : '-'}"></dd>
+                                <dt class="col-3 text-muted">디바이스</dt>
+                                <dd class="col-9 small text-break text-muted" th:text="${thread.userAgent != null ? thread.userAgent : '-'}"></dd>
                                 <dt class="col-3 text-muted">작성일</dt>
                                 <dd class="col-9" th:text="${#temporals.format(thread.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></dd>
                                 <dt class="col-3 text-muted" th:if="${thread.deletedAt != null}">삭제일</dt>
