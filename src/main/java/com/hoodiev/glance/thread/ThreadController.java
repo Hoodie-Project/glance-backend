@@ -180,8 +180,14 @@ public class ThreadController {
             @RequestParam double neLat,
 
             @Parameter(description = "bounding box 북동 경도", example = "126.95", required = true)
-            @RequestParam double neLng) {
-        return threadService.getPins(swLat, swLng, neLat, neLng);
+            @RequestParam double neLng,
+
+            @Parameter(
+                    description = "성별 필터 (선택). MALE=남, FEMALE=녀. 생략 시 전체",
+                    schema = @Schema(allowableValues = {"MALE", "FEMALE"})
+            )
+            @RequestParam(required = false) Gender gender) {
+        return threadService.getPins(swLat, swLng, neLat, neLng, gender);
     }
 
     @Operation(

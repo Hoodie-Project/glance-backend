@@ -46,6 +46,7 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             WHERE t.deleted_at IS NULL
               AND t.latitude BETWEEN :swLat AND :neLat
               AND t.longitude BETWEEN :swLng AND :neLng
+              AND (CAST(:gender AS VARCHAR) IS NULL OR t.gender = :gender)
             ORDER BY t.created_at DESC
             LIMIT 200
             """, nativeQuery = true)
@@ -53,7 +54,8 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             @Param("swLat") double swLat,
             @Param("swLng") double swLng,
             @Param("neLat") double neLat,
-            @Param("neLng") double neLng);
+            @Param("neLng") double neLng,
+            @Param("gender") String gender);
 
     @Query(value = """
             SELECT r.sido, r.sigungu, r.dong,

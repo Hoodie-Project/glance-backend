@@ -107,10 +107,11 @@ public class ThreadService {
     private static final double MAX_PINS_SPAN = 0.072;    // ~8km
     private static final double DONG_MAX_HALF_SPAN = 0.1; // 중심 기준 ±0.1° (~11km), 약 100동
 
-    public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng) {
+    public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng, Gender gender) {
         if (neLat - swLat > MAX_PINS_SPAN || neLng - swLng > MAX_PINS_SPAN)
             throw new BoundingBoxTooLargeException(MAX_PINS_SPAN);
-        return threadRepository.findPins(swLat, swLng, neLat, neLng).stream()
+        String genderParam = gender == null ? null : gender.name();
+        return threadRepository.findPins(swLat, swLng, neLat, neLng, genderParam).stream()
                 .map(row -> new ThreadPinResponse(
                         ((Number) row[0]).longValue(),
                         ((Number) row[1]).doubleValue(),
