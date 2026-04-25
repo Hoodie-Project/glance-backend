@@ -1,10 +1,14 @@
 package com.hoodiev.glance.common;
 
 import com.hoodiev.glance.comment.Comment;
+import com.hoodiev.glance.comment.CommentLike;
+import com.hoodiev.glance.comment.CommentLikeRepository;
 import com.hoodiev.glance.comment.CommentRepository;
 import com.hoodiev.glance.thread.AnimalLook;
 import com.hoodiev.glance.thread.Gender;
 import com.hoodiev.glance.thread.Thread;
+import com.hoodiev.glance.thread.ThreadLike;
+import com.hoodiev.glance.thread.ThreadLikeRepository;
 import com.hoodiev.glance.thread.ThreadRepository;
 import com.hoodiev.glance.thread.VibeStyle;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +26,9 @@ import java.util.Set;
 public class DataInitializer implements CommandLineRunner {
 
     private final ThreadRepository threadRepository;
+    private final ThreadLikeRepository threadLikeRepository;
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Override
@@ -96,54 +102,52 @@ public class DataInitializer implements CommandLineRunner {
                 .password(pw)
                 .build());
 
-        commentRepository.save(Comment.builder()
-                .thread(t1).nickname("궁금한사람")
-                .content("혹시 머리 길이가 어느 정도였나요? 제 친구일 수도 있어서요 ㅋㅋ")
-                .password(pw).build());
+        // 게시글 좋아요
+        addThreadLike(t1, "1.1.1.1"); addThreadLike(t1, "1.1.1.2"); addThreadLike(t1, "1.1.1.3");
+        addThreadLike(t1, "1.1.1.4"); addThreadLike(t1, "1.1.1.5");
+        addThreadLike(t2, "1.1.2.1"); addThreadLike(t2, "1.1.2.2"); addThreadLike(t2, "1.1.2.3");
+        addThreadLike(t3, "1.1.3.1"); addThreadLike(t3, "1.1.3.2"); addThreadLike(t3, "1.1.3.3");
+        addThreadLike(t3, "1.1.3.4"); addThreadLike(t3, "1.1.3.5"); addThreadLike(t3, "1.1.3.6");
+        addThreadLike(t3, "1.1.3.7");
+        addThreadLike(t4, "1.1.4.1"); addThreadLike(t4, "1.1.4.2");
+        addThreadLike(t5, "1.1.5.1"); addThreadLike(t5, "1.1.5.2"); addThreadLike(t5, "1.1.5.3");
+        addThreadLike(t5, "1.1.5.4");
 
-        commentRepository.save(Comment.builder()
-                .thread(t1).nickname("나도목격")
-                .content("저도 그 시간대에 홍대 있었는데 혹시 웨이브 머리셨나요?")
-                .password(pw).build());
+        // 댓글
+        Comment c1 = addComment(t1, "궁금한사람", "혹시 머리 길이가 어느 정도였나요? 제 친구일 수도 있어서요 ㅋㅋ", pw);
+        Comment c2 = addComment(t1, "나도목격", "저도 그 시간대에 홍대 있었는데 혹시 웨이브 머리셨나요?", pw);
+        Comment c3 = addComment(t1, "응원러", "용기내서 말 걸어보세요!! 응원합니다", pw);
+        Comment c4 = addComment(t2, "성수고정", "성수에 그런 분 많아요 ㅎㅎ 어느 카페였는지 힌트 주실 수 있나요?", pw);
+        Comment c5 = addComment(t2, "개발자아닐까", "노트북에 뭔가 붙어있었나요? 스티커라든지", pw);
+        Comment c6 = addComment(t3, "2호선러버", "2호선은 진짜 설레는 일이 많이 일어나는 것 같아요", pw);
+        Comment c7 = addComment(t3, "책추천러", "어떤 책 읽고 계셨는지 혹시 표지 보셨나요?", pw);
+        Comment c8 = addComment(t4, "뚝섬러너", "뚝섬 저도 자주 뛰어요! 오늘도 거기 있었는데", pw);
+        Comment c9 = addComment(t5, "망원토박이", "망원시장 그 떡볶이집 맛있죠 ㅋㅋ 저도 자주 가는데", pw);
+        Comment c10 = addComment(t5, "빨간니트탐정", "빨간 니트에 흰 운동화면 저 아는 사람 같기도..? 이름이 어떻게 되시나요", pw);
 
-        commentRepository.save(Comment.builder()
-                .thread(t1).nickname("응원러")
-                .content("용기내서 말 걸어보세요!! 응원합니다")
-                .password(pw).build());
+        // 댓글 좋아요
+        addCommentLike(c1, "2.1.1.1"); addCommentLike(c1, "2.1.1.2"); addCommentLike(c1, "2.1.1.3");
+        addCommentLike(c3, "2.1.3.1"); addCommentLike(c3, "2.1.3.2");
+        addCommentLike(c4, "2.2.4.1");
+        addCommentLike(c6, "2.3.6.1"); addCommentLike(c6, "2.3.6.2"); addCommentLike(c6, "2.3.6.3");
+        addCommentLike(c7, "2.3.7.1"); addCommentLike(c7, "2.3.7.2");
+        addCommentLike(c10, "2.5.10.1"); addCommentLike(c10, "2.5.10.2");
+    }
 
-        commentRepository.save(Comment.builder()
-                .thread(t2).nickname("성수고정")
-                .content("성수에 그런 분 많아요 ㅎㅎ 어느 카페였는지 힌트 주실 수 있나요?")
-                .password(pw).build());
+    private Comment addComment(Thread thread, String nickname, String content, String pw) {
+        Comment comment = commentRepository.save(Comment.builder()
+                .thread(thread).nickname(nickname).content(content).password(pw).build());
+        threadRepository.incrementCommentCount(thread.getId());
+        return comment;
+    }
 
-        commentRepository.save(Comment.builder()
-                .thread(t2).nickname("개발자아닐까")
-                .content("노트북에 뭔가 붙어있었나요? 스티커라든지")
-                .password(pw).build());
+    private void addThreadLike(Thread thread, String ip) {
+        threadLikeRepository.save(ThreadLike.builder().threadId(thread.getId()).ipAddress(ip).build());
+        threadRepository.incrementLikeCount(thread.getId());
+    }
 
-        commentRepository.save(Comment.builder()
-                .thread(t3).nickname("2호선러버")
-                .content("2호선은 진짜 설레는 일이 많이 일어나는 것 같아요")
-                .password(pw).build());
-
-        commentRepository.save(Comment.builder()
-                .thread(t3).nickname("책추천러")
-                .content("어떤 책 읽고 계셨는지 혹시 표지 보셨나요?")
-                .password(pw).build());
-
-        commentRepository.save(Comment.builder()
-                .thread(t4).nickname("뚝섬러너")
-                .content("뚝섬 저도 자주 뛰어요! 오늘도 거기 있었는데")
-                .password(pw).build());
-
-        commentRepository.save(Comment.builder()
-                .thread(t5).nickname("망원토박이")
-                .content("망원시장 그 떡볶이집 맛있죠 ㅋㅋ 저도 자주 가는데")
-                .password(pw).build());
-
-        commentRepository.save(Comment.builder()
-                .thread(t5).nickname("빨간니트탐정")
-                .content("빨간 니트에 흰 운동화면 저 아는 사람 같기도..? 이름이 어떻게 되시나요")
-                .password(pw).build());
+    private void addCommentLike(Comment comment, String ip) {
+        commentLikeRepository.save(CommentLike.builder().commentId(comment.getId()).ipAddress(ip).build());
+        commentRepository.incrementLikeCount(comment.getId());
     }
 }
