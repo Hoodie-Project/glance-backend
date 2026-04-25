@@ -39,6 +39,7 @@ services:
       NAVER_CLIENT_ID: ${NAVER_CLIENT_ID:-}
       NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET:-}
       REDIS_HOST: redis
+      SPRING_PROFILES_ACTIVE: dev
     ports:
       - "8081:8080"
 
