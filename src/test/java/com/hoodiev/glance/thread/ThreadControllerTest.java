@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hoodiev.glance.common.exception.EntityNotFoundException;
 import com.hoodiev.glance.common.exception.InvalidPasswordException;
 import com.hoodiev.glance.common.exception.RateLimitExceededException;
+import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
 import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
 import com.hoodiev.glance.thread.dto.ThreadDetailResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -75,13 +75,11 @@ class ThreadControllerTest {
     }
 
     @Test
-    void GET_threads_목록조회_200() throws Exception {
-        given(threadService.getThreads(any(Double.class), any(Double.class), any(), any(), any(), any()))
-                .willReturn(Page.empty());
+    void GET_threads_feed_피드조회_200() throws Exception {
+        given(threadService.getFeed(any(), any(Integer.class)))
+                .willReturn(new FeedResponse(List.of(), null, false));
 
-        mockMvc.perform(get("/api/threads")
-                        .param("lat", "37.5")
-                        .param("lng", "127.0"))
+        mockMvc.perform(get("/api/threads/feed"))
                 .andExpect(status().isOk());
     }
 

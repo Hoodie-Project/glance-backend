@@ -15,6 +15,32 @@ class GeocodingService(
     private val restClient = RestClient.create()
 
     @Suppress("UNCHECKED_CAST")
+    fun geocode(address: String): Pair<Double, Double>? {
+        if (clientId.isBlank()) return null
+        return try {
+            val response = restClient.get()
+                .uri(
+                    "https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query={query}",
+                    address
+                )
+                .header("X-NCP-APIGW-API-KEY-ID", clientId)
+                .header("X-NCP-APIGW-API-KEY", clientSecret)
+                .retrieve()
+                .body(object : ParameterizedTypeReference<Map<String, Any>>() {})
+
+            val first = (response?.get("addresses") as? List<Map<String, Any>>)
+                ?.firstOrNull() ?: return null
+
+            val lng = (first["x"] as? String)?.toDoubleOrNull() ?: return null
+            val lat = (first["y"] as? String)?.toDoubleOrNull() ?: return null
+            Pair(lat, lng)
+        } catch (e: Exception) {
+            log.error("Failed to geocode '{}': {}", address, e.message)
+            null
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
     fun reverseGeocode(latitude: Double, longitude: Double): LocationInfo? {
         if (clientId.isBlank()) {
             log.warn("Naver API key is not configured, skipping reverse geocoding")

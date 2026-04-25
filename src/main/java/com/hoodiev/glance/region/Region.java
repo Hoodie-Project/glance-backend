@@ -28,12 +28,20 @@ public class Region {
     @Column(nullable = false, length = 30)
     private String dong;
 
+    @Column
+    private Double centerLat;
+
+    @Column
+    private Double centerLng;
+
     @Builder
-    public Region(String legalCode, String sido, String sigungu, String dong) {
+    public Region(String legalCode, String sido, String sigungu, String dong, Double centerLat, Double centerLng) {
         this.legalCode = legalCode;
         this.sido = sido;
         this.sigungu = sigungu;
         this.dong = dong;
+        this.centerLat = centerLat;
+        this.centerLng = centerLng;
     }
 
     public void updateNames(String sido, String sigungu, String dong) {

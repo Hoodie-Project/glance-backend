@@ -10,19 +10,21 @@ import com.hoodiev.glance.common.util.PasswordGenerator;
 import com.hoodiev.glance.common.util.RateLimiter;
 import com.hoodiev.glance.region.GeocodingService;
 import com.hoodiev.glance.region.LocationInfo;
+import java.util.ArrayList;
+import java.util.HashSet;
 import com.hoodiev.glance.region.Region;
 import com.hoodiev.glance.region.RegionRepository;
 import com.hoodiev.glance.region.dto.RegionResponse;
-import com.hoodiev.glance.thread.dto.ClusterResponse;
-import com.hoodiev.glance.thread.dto.RangeFilter;
-import com.hoodiev.glance.thread.dto.RegionMarkerResponse;
+import com.hoodiev.glance.thread.dto.DongMarkerResponse;
+import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
 import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
 import com.hoodiev.glance.thread.dto.ThreadDetailResponse;
 import com.hoodiev.glance.thread.dto.ThreadListResponse;
+import com.hoodiev.glance.thread.dto.ThreadPinResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -85,51 +87,45 @@ public class ThreadService {
                 saved.getCreatedAt(), generated ? rawPassword : null);
     }
 
-    public Page<ThreadListResponse> getThreads(double lat, double lng, RangeFilter range,
-                                               String tag, Gender gender, Pageable pageable) {
-        String genderParam = gender == null ? null : gender.name();
-        String tagParam = (tag == null || tag.isBlank()) ? null : tag;
-        return threadRepository.searchThreads(lat, lng, range.getKm(), genderParam, tagParam, pageable)
-                .map(this::toListResponse);
+    public FeedResponse getFeed(Long cursor, int size) {
+        List<Thread> rows = threadRepository.findFeed(cursor, PageRequest.of(0, size + 1));
+        boolean hasMore = rows.size() > size;
+        List<Thread> threads = hasMore ? rows.subList(0, size) : rows;
+        Long nextCursor = hasMore ? threads.get(threads.size() - 1).getId() : null;
+        return new FeedResponse(threads.stream().map(this::toListResponse).toList(), nextCursor, hasMore);
     }
 
-    public Page<ThreadListResponse> searchByTag(String tag, Pageable pageable) {
-        return threadRepository.searchByTag(tag, pageable).map(this::toListResponse);
+    public FeedResponse getNearbyFeed(double lat, double lng, double radiusKm, Long cursor, int size) {
+        List<Thread> rows = threadRepository.findNearbyFeed(lat, lng, radiusKm, cursor, size + 1);
+        boolean hasMore = rows.size() > size;
+        List<Thread> threads = hasMore ? rows.subList(0, size) : rows;
+        Long nextCursor = hasMore ? threads.get(threads.size() - 1).getId() : null;
+        return new FeedResponse(threads.stream().map(this::toListResponse).toList(), nextCursor, hasMore);
     }
 
-    public List<ClusterResponse> getClusters(int zoomLevel, double swLat, double swLng,
-                                             double neLat, double neLng) {
-        double gridSize = 180.0 / Math.pow(2, Math.max(1, zoomLevel));
-        return threadRepository.findClusters(swLat, swLng, neLat, neLng, gridSize).stream()
-                .map(row -> new ClusterResponse(
-                        ((Number) row[0]).doubleValue(),
+    public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng) {
+        return threadRepository.findPins(swLat, swLng, neLat, neLng).stream()
+                .map(row -> new ThreadPinResponse(
+                        ((Number) row[0]).longValue(),
                         ((Number) row[1]).doubleValue(),
-                        ((Number) row[2]).longValue()))
+                        ((Number) row[2]).doubleValue()))
                 .toList();
     }
 
-    @Cacheable(value = "regionMarkers", key = "#level + ':' + #sido + ':' + #sigungu")
-    public List<RegionMarkerResponse> getRegionMarkers(String level, String sido, String sigungu) {
-        if ("dong".equalsIgnoreCase(level)) {
-            return threadRepository.findMarkersByDong(sido, sigungu).stream()
-                    .map(row -> new RegionMarkerResponse(
-                            (String) row[0],
-                            (String) row[1],
-                            (String) row[2],
-                            ((Number) row[3]).longValue(),
-                            ((Number) row[4]).doubleValue(),
-                            ((Number) row[5]).doubleValue()))
-                    .toList();
-        }
-        return threadRepository.findMarkersBySigungu(sido).stream()
-                .map(row -> new RegionMarkerResponse(
+    public List<DongMarkerResponse> getDongMarkers(double swLat, double swLng, double neLat, double neLng) {
+        return threadRepository.findDongMarkers(swLat, swLng, neLat, neLng).stream()
+                .map(row -> new DongMarkerResponse(
                         (String) row[0],
                         (String) row[1],
-                        null,
+                        (String) row[2],
                         ((Number) row[3]).longValue(),
                         ((Number) row[4]).doubleValue(),
                         ((Number) row[5]).doubleValue()))
                 .toList();
+    }
+
+    public Page<ThreadListResponse> searchByTag(String tag, Pageable pageable) {
+        return threadRepository.searchByTag(tag, pageable).map(this::toListResponse);
     }
 
     public ThreadDetailResponse getThread(Long id) {
@@ -151,7 +147,10 @@ public class ThreadService {
                 thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(),
                 RegionResponse.from(thread.getRegion()),
-                thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
+                thread.getGender(),
+                new ArrayList<>(thread.getTags()),
+                new HashSet<>(thread.getAnimalLooks()),
+                new HashSet<>(thread.getVibeStyles()),
                 thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt(), comments);
     }
@@ -206,12 +205,18 @@ public class ThreadService {
                     }
                     return region;
                 })
-                .orElseGet(() -> regionRepository.save(Region.builder()
-                        .legalCode(location.legalCode())
-                        .sido(location.sido())
-                        .sigungu(location.sigungu())
-                        .dong(location.dong())
-                        .build()));
+                .orElseGet(() -> {
+                    String address = location.sido() + " " + location.sigungu() + " " + location.dong();
+                    var center = geocodingService.geocode(address);
+                    return regionRepository.save(Region.builder()
+                            .legalCode(location.legalCode())
+                            .sido(location.sido())
+                            .sigungu(location.sigungu())
+                            .dong(location.dong())
+                            .centerLat(center != null ? center.getFirst() : null)
+                            .centerLng(center != null ? center.getSecond() : null)
+                            .build());
+                });
     }
 
     private ThreadListResponse toListResponse(Thread thread) {
@@ -219,7 +224,10 @@ public class ThreadService {
                 thread.getId(), thread.getNickname(), thread.getTitle(), thread.getContent(),
                 thread.getLatitude(), thread.getLongitude(),
                 RegionResponse.from(thread.getRegion()),
-                thread.getGender(), thread.getTags(), thread.getAnimalLooks(), thread.getVibeStyles(),
+                thread.getGender(),
+                new ArrayList<>(thread.getTags()),
+                new HashSet<>(thread.getAnimalLooks()),
+                new HashSet<>(thread.getVibeStyles()),
                 thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt());
     }

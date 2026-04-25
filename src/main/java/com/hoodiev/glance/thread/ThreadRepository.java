@@ -15,78 +15,61 @@ import java.util.List;
 
 public interface ThreadRepository extends JpaRepository<Thread, Long> {
 
+    @Query("""
+            SELECT t FROM Thread t
+            WHERE t.deletedAt IS NULL
+            AND (:cursor IS NULL OR t.id < :cursor)
+            ORDER BY t.id DESC
+            """)
+    List<Thread> findFeed(@Param("cursor") Long cursor, Pageable pageable);
+
     @Query(value = """
             SELECT * FROM threads t
             WHERE t.deleted_at IS NULL
               AND (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
                   * cos(radians(t.longitude) - radians(:lng))
                   + sin(radians(:lat)) * sin(radians(t.latitude)))) <= :radiusKm
-              AND (CAST(:gender AS VARCHAR) IS NULL OR t.gender = :gender)
-              AND (CAST(:tag AS VARCHAR) IS NULL OR EXISTS (
-                  SELECT 1 FROM thread_tags tt
-                  WHERE tt.thread_id = t.id AND tt.tag = :tag))
-            ORDER BY t.created_at DESC
-            """,
-            countQuery = """
-            SELECT count(*) FROM threads t
-            WHERE t.deleted_at IS NULL
-              AND (6371 * acos(cos(radians(:lat)) * cos(radians(t.latitude))
-                  * cos(radians(t.longitude) - radians(:lng))
-                  + sin(radians(:lat)) * sin(radians(t.latitude)))) <= :radiusKm
-              AND (CAST(:gender AS VARCHAR) IS NULL OR t.gender = :gender)
-              AND (CAST(:tag AS VARCHAR) IS NULL OR EXISTS (
-                  SELECT 1 FROM thread_tags tt
-                  WHERE tt.thread_id = t.id AND tt.tag = :tag))
-            """,
-            nativeQuery = true)
-    Page<Thread> searchThreads(
+              AND (CAST(:cursor AS BIGINT) IS NULL OR t.id < :cursor)
+            ORDER BY t.id DESC
+            LIMIT :size
+            """, nativeQuery = true)
+    List<Thread> findNearbyFeed(
             @Param("lat") double lat,
             @Param("lng") double lng,
             @Param("radiusKm") double radiusKm,
-            @Param("gender") String gender,
-            @Param("tag") String tag,
-            Pageable pageable);
+            @Param("cursor") Long cursor,
+            @Param("size") int size);
 
     @Query(value = """
-            SELECT AVG(t.latitude) AS lat,
-                   AVG(t.longitude) AS lng,
-                   COUNT(*) AS cnt
+            SELECT t.id, t.latitude, t.longitude
             FROM threads t
             WHERE t.deleted_at IS NULL
               AND t.latitude BETWEEN :swLat AND :neLat
               AND t.longitude BETWEEN :swLng AND :neLng
-            GROUP BY FLOOR(t.latitude / :gridSize), FLOOR(t.longitude / :gridSize)
-            """,
-            nativeQuery = true)
-    List<Object[]> findClusters(
+            ORDER BY t.created_at DESC
+            LIMIT 200
+            """, nativeQuery = true)
+    List<Object[]> findPins(
             @Param("swLat") double swLat,
             @Param("swLng") double swLng,
             @Param("neLat") double neLat,
-            @Param("neLng") double neLng,
-            @Param("gridSize") double gridSize);
-
-    @Query(value = """
-            SELECT r.sido, r.sigungu, NULL as dong,
-                   COUNT(t.id) as cnt, AVG(t.latitude) as lat, AVG(t.longitude) as lng
-            FROM threads t
-            JOIN regions r ON t.region_id = r.id
-            WHERE t.deleted_at IS NULL
-              AND (CAST(:sido AS VARCHAR) IS NULL OR r.sido = :sido)
-            GROUP BY r.sido, r.sigungu
-            """, nativeQuery = true)
-    List<Object[]> findMarkersBySigungu(@Param("sido") String sido);
+            @Param("neLng") double neLng);
 
     @Query(value = """
             SELECT r.sido, r.sigungu, r.dong,
-                   COUNT(t.id) as cnt, AVG(t.latitude) as lat, AVG(t.longitude) as lng
-            FROM threads t
-            JOIN regions r ON t.region_id = r.id
-            WHERE t.deleted_at IS NULL
-              AND (CAST(:sido AS VARCHAR) IS NULL OR r.sido = :sido)
-              AND (CAST(:sigungu AS VARCHAR) IS NULL OR r.sigungu = :sigungu)
-            GROUP BY r.sido, r.sigungu, r.dong
+                   COUNT(t.id) as cnt, r.center_lat as lat, r.center_lng as lng
+            FROM regions r
+            JOIN threads t ON t.region_id = r.id AND t.deleted_at IS NULL
+            WHERE r.center_lat IS NOT NULL
+              AND r.center_lat BETWEEN :swLat AND :neLat
+              AND r.center_lng BETWEEN :swLng AND :neLng
+            GROUP BY r.id, r.sido, r.sigungu, r.dong, r.center_lat, r.center_lng
             """, nativeQuery = true)
-    List<Object[]> findMarkersByDong(@Param("sido") String sido, @Param("sigungu") String sigungu);
+    List<Object[]> findDongMarkers(
+            @Param("swLat") double swLat,
+            @Param("swLng") double swLng,
+            @Param("neLat") double neLat,
+            @Param("neLng") double neLng);
 
     @Query("""
             SELECT DISTINCT t FROM Thread t

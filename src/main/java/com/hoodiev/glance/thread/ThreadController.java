@@ -3,13 +3,13 @@ package com.hoodiev.glance.thread;
 import com.hoodiev.glance.common.dto.DeleteRequest;
 import com.hoodiev.glance.common.dto.ErrorResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
-import com.hoodiev.glance.thread.dto.ClusterResponse;
-import com.hoodiev.glance.thread.dto.RangeFilter;
-import com.hoodiev.glance.thread.dto.RegionMarkerResponse;
+import com.hoodiev.glance.thread.dto.DongMarkerResponse;
+import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
 import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
 import com.hoodiev.glance.thread.dto.ThreadDetailResponse;
 import com.hoodiev.glance.thread.dto.ThreadListResponse;
+import com.hoodiev.glance.thread.dto.ThreadPinResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,30 +73,42 @@ public class ThreadController {
     }
 
     @Operation(
-            summary = "스레드 목록 조회 (피드)",
+            summary = "스레드 피드 (최신순 무한스크롤)",
             description = """
-                    내 위치 기준 반경 내 스레드를 최신순으로 반환합니다. 무한 스크롤 피드용.
+                    전체 스레드를 최신순으로 반환합니다. Cursor 기반 무한스크롤 피드용.
 
-                    ### 거리 계산
-                    - Haversine 공식으로 구면 거리 계산 (km 단위)
-                    - `deleted_at IS NULL` 인 스레드만 노출
-
-                    ### 반경(range) 필터 허용값
-                    - `0.5`: 500m 이내
-                    - `2`: 2km 이내
-                    - `5`: 5km 이내
-                    - `all`: 거리 무제한 (디폴트)
-
-                    ### 선택 필터
-                    - `tag`: 해당 문자열이 스레드 태그 리스트에 포함된 것만
-                    - `gender`: `MALE` / `FEMALE` 중 하나로 필터
-
-                    ### 페이지네이션
-                    - `page`: 0-based
-                    - `size`: 기본 10, 최대 권장 50
+                    ### Cursor 페이지네이션
+                    - 첫 요청: `cursor` 생략 → 최신 `size`개 반환
+                    - 이후 요청: 이전 응답의 `nextCursor`를 `cursor`로 전달
+                    - `hasMore: false`이면 마지막 페이지
                     """)
-    @GetMapping
-    public Page<ThreadListResponse> list(
+    @GetMapping("/feed")
+    public FeedResponse feed(
+            @Parameter(description = "마지막으로 받은 스레드 ID (첫 요청 시 생략)")
+            @RequestParam(required = false) Long cursor,
+
+            @Parameter(description = "페이지 크기 (기본 20)", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+        return threadService.getFeed(cursor, size);
+    }
+
+    @Operation(
+            summary = "내 주변 피드 (반경 무한스크롤)",
+            description = """
+                    내 위치 기준 반경 내 스레드를 최신순으로 반환합니다. Cursor 기반 무한스크롤용.
+
+                    ### 반경(radius) 허용값
+                    - `0.5`: 500m
+                    - `2`: 2km (기본값)
+                    - `5`: 5km
+
+                    ### Cursor 페이지네이션
+                    - 첫 요청: `cursor` 생략 → 최신 `size`개 반환
+                    - 이후 요청: 이전 응답의 `nextCursor`를 `cursor`로 전달
+                    - `hasMore: false`이면 마지막 페이지
+                    """)
+    @GetMapping("/feed/nearby")
+    public FeedResponse nearbyFeed(
             @Parameter(description = "내 위치 위도", example = "37.5563", required = true)
             @RequestParam double lat,
 
@@ -104,25 +116,18 @@ public class ThreadController {
             @RequestParam double lng,
 
             @Parameter(
-                    description = "반경 필터. 허용값: `0.5` (500m), `2` (2km), `5` (5km), `all` (무제한)",
-                    example = "all",
-                    schema = @Schema(allowableValues = {"0.5", "2", "5", "all"}, defaultValue = "all")
+                    description = "반경 (km). 허용값: `0.5`, `2`, `5`",
+                    example = "2",
+                    schema = @Schema(allowableValues = {"0.5", "2", "5"}, defaultValue = "2")
             )
-            @RequestParam(defaultValue = "all") String range,
+            @RequestParam(defaultValue = "2") double radius,
 
-            @Parameter(description = "해시태그 정확 일치 필터 (선택)", example = "홍대")
-            @RequestParam(required = false) String tag,
+            @Parameter(description = "마지막으로 받은 스레드 ID (첫 요청 시 생략)")
+            @RequestParam(required = false) Long cursor,
 
-            @Parameter(
-                    description = "힐끔 대상 성별 필터 (선택). MALE=남성, FEMALE=여성",
-                    example = "FEMALE",
-                    schema = @Schema(allowableValues = {"MALE", "FEMALE"})
-            )
-            @RequestParam(required = false) Gender gender,
-
-            @Parameter(description = "페이지네이션 (page, size=10 고정 권장)")
-            @PageableDefault(size = 10) Pageable pageable) {
-        return threadService.getThreads(lat, lng, RangeFilter.from(range), tag, gender, pageable);
+            @Parameter(description = "페이지 크기 (기본 20)", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
+        return threadService.getNearbyFeed(lat, lng, radius, cursor, size);
     }
 
     @Operation(
@@ -150,29 +155,17 @@ public class ThreadController {
     }
 
     @Operation(
-            summary = "지도 클러스터 조회",
+            summary = "지도 핀 조회 (줌인)",
             description = """
-                    화면에 보이는 bounding box 영역의 스레드들을 `zoomLevel` 기반 그리드 셀로 묶어
-                    [대표 좌표, 개수] 배열로 반환합니다. 클러스터 마커 렌더링용.
-
-                    ### 그리드 크기 계산
-                    `gridSize = 180 / 2^zoomLevel`
-                    - zoom이 클수록(확대) 셀이 작아져 군집이 잘게 쪼개짐
-                    - zoom 1~20 권장
+                    현재 지도 화면(bounding box) 안의 스레드 핀을 반환합니다. 최신순, 최대 200개.
 
                     ### bounding box
                     - `swLat`/`swLng`: 남서쪽 모서리
                     - `neLat`/`neLng`: 북동쪽 모서리
                     - 지도 라이브러리의 `getBounds()` 값을 그대로 전달
-
-                    ### 대표 좌표
-                    각 그리드 셀 안에 있는 스레드들의 위경도 평균값
                     """)
-    @GetMapping("/map")
-    public List<ClusterResponse> map(
-            @Parameter(description = "지도 줌 레벨 (1~20 권장)", example = "13", required = true)
-            @RequestParam int zoomLevel,
-
+    @GetMapping("/map/pins")
+    public List<ThreadPinResponse> pins(
             @Parameter(description = "bounding box 남서 위도", example = "37.54", required = true)
             @RequestParam double swLat,
 
@@ -184,44 +177,32 @@ public class ThreadController {
 
             @Parameter(description = "bounding box 북동 경도", example = "126.95", required = true)
             @RequestParam double neLng) {
-        return threadService.getClusters(zoomLevel, swLat, swLng, neLat, neLng);
+        return threadService.getPins(swLat, swLng, neLat, neLng);
     }
 
     @Operation(
-            summary = "지도 지역 마커 조회",
+            summary = "지도 동 마커 조회 (줌아웃)",
             description = """
-                    지도 줌 레벨에 따라 시군구 또는 동 단위로 게시글 수와 마커 좌표를 반환합니다.
-
-                    ### level 파라미터
-                    - `sigungu`: 시군구 단위로 묶어서 반환 (지도 축소 상태)
-                    - `dong`: 동 단위로 묶어서 반환 (지도 확대 상태)
-
-                    ### 필터 파라미터
-                    - `sido`: 특정 시도 내로 제한 (선택). 미입력 시 전국 반환
-                    - `sigungu`: `level=dong` 일 때 특정 시군구 내로 제한 (선택)
+                    현재 지도 화면(bounding box) 안의 스레드를 동 단위로 집계하여 반환합니다.
+                    줌아웃 상태에서 동 이름과 게시글 수를 마커로 표시할 때 사용.
 
                     ### 마커 좌표 (lat, lng)
-                    해당 지역 내 게시글들의 위경도 평균값. 지도에 마커를 찍을 위치로 사용.
-
-                    ### 사용 예시
-                    - 지도 축소: `?level=sigungu&sido=서울특별시` → 마포구 5개, 강남구 12개 ...
-                    - 지도 확대: `?level=dong&sido=서울특별시&sigungu=강남구` → 역삼동 3개, 삼성동 9개 ...
+                    해당 동에 속한 스레드들의 위경도 평균값.
                     """)
-    @GetMapping("/map/regions")
-    public List<RegionMarkerResponse> regionMarkers(
-            @Parameter(
-                    description = "집계 단위. `sigungu` (시군구) 또는 `dong` (동)",
-                    example = "sigungu",
-                    schema = @Schema(allowableValues = {"sigungu", "dong"}, defaultValue = "sigungu")
-            )
-            @RequestParam(defaultValue = "sigungu") String level,
+    @GetMapping("/map/dong")
+    public List<DongMarkerResponse> dongMarkers(
+            @Parameter(description = "bounding box 남서 위도", example = "37.40", required = true)
+            @RequestParam double swLat,
 
-            @Parameter(description = "시도 필터 (선택). 미입력 시 전국", example = "서울특별시")
-            @RequestParam(required = false) String sido,
+            @Parameter(description = "bounding box 남서 경도", example = "126.80", required = true)
+            @RequestParam double swLng,
 
-            @Parameter(description = "시군구 필터 (선택, level=dong 일 때 유효)", example = "강남구")
-            @RequestParam(required = false) String sigungu) {
-        return threadService.getRegionMarkers(level, sido, sigungu);
+            @Parameter(description = "bounding box 북동 위도", example = "37.70", required = true)
+            @RequestParam double neLat,
+
+            @Parameter(description = "bounding box 북동 경도", example = "127.10", required = true)
+            @RequestParam double neLng) {
+        return threadService.getDongMarkers(swLat, swLng, neLat, neLng);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")
