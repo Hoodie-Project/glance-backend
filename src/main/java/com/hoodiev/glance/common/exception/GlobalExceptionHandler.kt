@@ -26,6 +26,11 @@ class GlobalExceptionHandler {
     fun handleRateLimit(e: RateLimitExceededException) =
         ErrorResponse(429, e.message!!, LocalDateTime.now())
 
+    @ExceptionHandler(BoundingBoxTooLargeException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleBoundingBoxTooLarge(e: BoundingBoxTooLargeException) =
+        ErrorResponse(400, e.message!!, LocalDateTime.now())
+
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidation(e: MethodArgumentNotValidException): ErrorResponse {

@@ -64,6 +64,8 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
               AND r.center_lat BETWEEN :swLat AND :neLat
               AND r.center_lng BETWEEN :swLng AND :neLng
             GROUP BY r.id, r.sido, r.sigungu, r.dong, r.center_lat, r.center_lng
+            ORDER BY cnt DESC
+            LIMIT 100
             """, nativeQuery = true)
     List<Object[]> findDongMarkers(
             @Param("swLat") double swLat,

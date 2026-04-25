@@ -163,6 +163,10 @@ public class ThreadController {
                     - `swLat`/`swLng`: 남서쪽 모서리
                     - `neLat`/`neLng`: 북동쪽 모서리
                     - 지도 라이브러리의 `getBounds()` 값을 그대로 전달
+
+                    ### 범위 제한
+                    - 위도/경도 각각 **0.072° 이하** (~8km). 초과 시 400 반환.
+                    - 줌인 상태(핀 표시)에서만 호출할 것
                     """)
     @GetMapping("/map/pins")
     public List<ThreadPinResponse> pins(
@@ -188,6 +192,10 @@ public class ThreadController {
 
                     ### 마커 좌표 (lat, lng)
                     해당 동에 속한 스레드들의 위경도 평균값.
+
+                    ### 범위 제한
+                    - bbox가 넓어도 중심 기준 **±0.1°** (~11km)로 자동 클램핑.
+                    - 게시글 많은 동 상위 100개 반환.
                     """)
     @GetMapping("/map/dong")
     public List<DongMarkerResponse> dongMarkers(

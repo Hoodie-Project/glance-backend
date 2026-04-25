@@ -3,6 +3,7 @@ package com.hoodiev.glance.thread;
 import com.hoodiev.glance.comment.CommentRepository;
 import com.hoodiev.glance.comment.dto.CommentResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
+import com.hoodiev.glance.common.exception.BoundingBoxTooLargeException;
 import com.hoodiev.glance.common.exception.EntityNotFoundException;
 import com.hoodiev.glance.common.exception.InvalidPasswordException;
 import com.hoodiev.glance.common.exception.RateLimitExceededException;
@@ -103,7 +104,12 @@ public class ThreadService {
         return new FeedResponse(threads.stream().map(this::toListResponse).toList(), nextCursor, hasMore);
     }
 
+    private static final double MAX_PINS_SPAN = 0.072;    // ~8km
+    private static final double DONG_MAX_HALF_SPAN = 0.1; // 중심 기준 ±0.1° (~11km), 약 100동
+
     public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng) {
+        if (neLat - swLat > MAX_PINS_SPAN || neLng - swLng > MAX_PINS_SPAN)
+            throw new BoundingBoxTooLargeException(MAX_PINS_SPAN);
         return threadRepository.findPins(swLat, swLng, neLat, neLng).stream()
                 .map(row -> new ThreadPinResponse(
                         ((Number) row[0]).longValue(),
@@ -113,7 +119,15 @@ public class ThreadService {
     }
 
     public List<DongMarkerResponse> getDongMarkers(double swLat, double swLng, double neLat, double neLng) {
-        return threadRepository.findDongMarkers(swLat, swLng, neLat, neLng).stream()
+        double centerLat = (swLat + neLat) / 2;
+        double centerLng = (swLng + neLng) / 2;
+        double halfLat = Math.min((neLat - swLat) / 2, DONG_MAX_HALF_SPAN);
+        double halfLng = Math.min((neLng - swLng) / 2, DONG_MAX_HALF_SPAN);
+        double clampedSwLat = centerLat - halfLat;
+        double clampedSwLng = centerLng - halfLng;
+        double clampedNeLat = centerLat + halfLat;
+        double clampedNeLng = centerLng + halfLng;
+        return threadRepository.findDongMarkers(clampedSwLat, clampedSwLng, clampedNeLat, clampedNeLng).stream()
                 .map(row -> new DongMarkerResponse(
                         (String) row[0],
                         (String) row[1],
