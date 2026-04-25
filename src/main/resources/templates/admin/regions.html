@@ -19,6 +19,8 @@
                                 <th>시도</th>
                                 <th>시군구</th>
                                 <th>동</th>
+                                <th>위도</th>
+                                <th>경도</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -28,9 +30,11 @@
                                 <td th:text="${region.sido}"></td>
                                 <td th:text="${region.sigungu}"></td>
                                 <td th:text="${region.dong}"></td>
+                                <td th:text="${region.centerLat != null ? #numbers.formatDecimal(region.centerLat, 1, 6) : '-'}" class="text-muted small"></td>
+                                <td th:text="${region.centerLng != null ? #numbers.formatDecimal(region.centerLng, 1, 6) : '-'}" class="text-muted small"></td>
                             </tr>
                             <tr th:if="${#lists.isEmpty(regions)}">
-                                <td colspan="5" class="text-center text-muted py-4">지역 데이터가 없습니다.</td>
+                                <td colspan="7" class="text-center text-muted py-4">지역 데이터가 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>
