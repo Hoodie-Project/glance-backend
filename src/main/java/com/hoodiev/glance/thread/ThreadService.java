@@ -110,7 +110,7 @@ public class ThreadService {
     public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng, Gender gender) {
         if (neLat - swLat > MAX_PINS_SPAN || neLng - swLng > MAX_PINS_SPAN)
             throw new BoundingBoxTooLargeException(MAX_PINS_SPAN);
-        String genderParam = gender == null ? null : gender.name();
+        String genderParam = (gender == null || gender == Gender.ALL) ? null : gender.name();
         return threadRepository.findPins(swLat, swLng, neLat, neLng, genderParam).stream()
                 .map(row -> new ThreadPinResponse(
                         ((Number) row[0]).longValue(),

@@ -183,8 +183,8 @@ public class ThreadController {
             @RequestParam double neLng,
 
             @Parameter(
-                    description = "성별 필터 (선택). MALE=남, FEMALE=녀. 생략 시 전체",
-                    schema = @Schema(allowableValues = {"MALE", "FEMALE"})
+                    description = "성별 필터 (선택). ALL=전체, MALE=남, FEMALE=녀. 생략 시 전체",
+                    schema = @Schema(allowableValues = {"ALL", "MALE", "FEMALE"})
             )
             @RequestParam(required = false) Gender gender) {
         return threadService.getPins(swLat, swLng, neLat, neLng, gender);
