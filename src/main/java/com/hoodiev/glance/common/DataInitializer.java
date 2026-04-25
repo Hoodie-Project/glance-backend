@@ -156,11 +156,17 @@ public class DataInitializer implements CommandLineRunner {
         LocationInfo info = geocodingService.reverseGeocode(lat, lng);
         if (info == null) return null;
         return regionRepository.findByLegalCode(info.legalCode())
-                .orElseGet(() -> regionRepository.save(Region.builder()
-                        .legalCode(info.legalCode())
-                        .sido(info.sido())
-                        .sigungu(info.sigungu())
-                        .dong(info.dong())
-                        .build()));
+                .orElseGet(() -> {
+                    String address = info.sido() + " " + info.sigungu() + " " + info.dong();
+                    var center = geocodingService.geocode(address);
+                    return regionRepository.save(Region.builder()
+                            .legalCode(info.legalCode())
+                            .sido(info.sido())
+                            .sigungu(info.sigungu())
+                            .dong(info.dong())
+                            .centerLat(center != null ? center.getFirst() : null)
+                            .centerLng(center != null ? center.getSecond() : null)
+                            .build());
+                });
     }
 }
