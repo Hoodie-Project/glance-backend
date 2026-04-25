@@ -46,7 +46,7 @@ public class ThreadService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     @Transactional
-    public ThreadCreateResponse create(ThreadCreateRequest request, String clientIp) {
+    public ThreadCreateResponse create(ThreadCreateRequest request, String clientIp, String userAgent) {
         if (!rateLimiter.tryAcquire(clientIp)) {
             throw new RateLimitExceededException();
         }
@@ -70,6 +70,8 @@ public class ThreadService {
                 .tags(request.tags())
                 .animalLooks(request.animalLooks())
                 .vibeStyles(request.vibeStyles())
+                .clientIp(clientIp)
+                .userAgent(userAgent)
                 .build();
 
         Thread saved = threadRepository.save(thread);

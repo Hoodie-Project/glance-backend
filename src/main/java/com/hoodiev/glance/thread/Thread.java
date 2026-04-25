@@ -76,6 +76,12 @@ public class Thread {
     @Column(nullable = false)
     private Integer commentCount = 0;
 
+    @Column(updatable = false, length = 45)
+    private String clientIp;
+
+    @Column(updatable = false, length = 512)
+    private String userAgent;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -90,7 +96,8 @@ public class Thread {
     @Builder
     public Thread(String nickname, String title, String content, Double latitude, Double longitude,
                   Region region, String password, Gender gender, List<String> tags,
-                  Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles) {
+                  Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles,
+                  String clientIp, String userAgent) {
         this.nickname = nickname;
         this.title = title;
         this.content = content;
@@ -102,6 +109,8 @@ public class Thread {
         this.tags = tags != null ? tags : new ArrayList<>();
         this.animalLooks = animalLooks != null ? animalLooks : new HashSet<>();
         this.vibeStyles = vibeStyles != null ? vibeStyles : new HashSet<>();
+        this.clientIp = clientIp;
+        this.userAgent = userAgent;
     }
 
     public void softDelete() {

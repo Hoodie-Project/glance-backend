@@ -69,7 +69,7 @@ public class ThreadController {
     public ThreadCreateResponse create(
             @Valid @RequestBody ThreadCreateRequest request,
             HttpServletRequest http) {
-        return threadService.create(request, clientIp(http));
+        return threadService.create(request, clientIp(http), http.getHeader("User-Agent"));
     }
 
     @Operation(

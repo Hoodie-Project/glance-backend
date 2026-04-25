@@ -51,6 +51,10 @@
                                 <dd class="col-9" th:text="${thread.likeCount}"></dd>
                                 <dt class="col-3 text-muted">댓글 수</dt>
                                 <dd class="col-9" th:text="${thread.commentCount}"></dd>
+                                <dt class="col-3 text-muted">작성 IP</dt>
+                                <dd class="col-9 font-monospace small" th:text="${thread.clientIp != null ? thread.clientIp : '-'}"></dd>
+                                <dt class="col-3 text-muted">User-Agent</dt>
+                                <dd class="col-9 small text-break" th:text="${thread.userAgent != null ? thread.userAgent : '-'}"></dd>
                                 <dt class="col-3 text-muted">작성일</dt>
                                 <dd class="col-9" th:text="${#temporals.format(thread.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></dd>
                                 <dt class="col-3 text-muted" th:if="${thread.deletedAt != null}">삭제일</dt>
