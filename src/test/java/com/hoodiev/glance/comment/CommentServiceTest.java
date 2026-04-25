@@ -47,7 +47,7 @@ class CommentServiceTest {
         Comment comment = Comment.builder().thread(thread).content("댓글내용").password("encoded").build();
         given(commentRepository.save(any())).willReturn(comment);
 
-        var response = commentService.create(1L, new CommentCreateRequest("댓글내용", null));
+        var response = commentService.create(1L, new CommentCreateRequest("닉네임", "댓글내용", null));
 
         assertThat(response.generatedPassword()).isEqualTo("auto1234");
         assertThat(response.content()).isEqualTo("댓글내용");
@@ -63,7 +63,7 @@ class CommentServiceTest {
 
         given(threadRepository.findById(1L)).willReturn(Optional.of(thread));
 
-        assertThatThrownBy(() -> commentService.create(1L, new CommentCreateRequest("댓글", null)))
+        assertThatThrownBy(() -> commentService.create(1L, new CommentCreateRequest("닉네임", "댓글", null)))
                 .isInstanceOf(EntityNotFoundException.class);
     }
 

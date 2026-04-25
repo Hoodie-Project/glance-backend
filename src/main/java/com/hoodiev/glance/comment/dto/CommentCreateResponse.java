@@ -9,6 +9,9 @@ public record CommentCreateResponse(
         @Schema(description = "댓글 ID", example = "10")
         Long id,
 
+        @Schema(description = "닉네임", example = "익명의 고양이")
+        String nickname,
+
         @Schema(description = "댓글 내용", example = "저도 궁금해요")
         String content,
 

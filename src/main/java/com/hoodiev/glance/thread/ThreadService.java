@@ -139,6 +139,7 @@ public class ThreadService {
                 .stream()
                 .map(comment -> new CommentResponse(
                         comment.getId(),
+                        comment.getNickname(),
                         comment.getContent(),
                         comment.getLikeCount() != null ? comment.getLikeCount() : 0,
                         comment.getCreatedAt()))

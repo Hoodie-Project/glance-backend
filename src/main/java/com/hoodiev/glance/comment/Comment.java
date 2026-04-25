@@ -23,6 +23,9 @@ public class Comment {
     @JoinColumn(name = "thread_id", nullable = false)
     private Thread thread;
 
+    @Column(nullable = false, length = 20)
+    private String nickname;
+
     @Column(nullable = false, length = 300)
     private String content;
 
@@ -41,8 +44,9 @@ public class Comment {
     }
 
     @Builder
-    public Comment(Thread thread, String content, String password) {
+    public Comment(Thread thread, String nickname, String content, String password) {
         this.thread = thread;
+        this.nickname = nickname;
         this.content = content;
         this.password = password;
     }

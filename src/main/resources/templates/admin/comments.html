@@ -20,6 +20,7 @@
                         <thead class="table-light">
                             <tr>
                                 <th style="width:60px">ID</th>
+                                <th style="width:120px">닉네임</th>
                                 <th>내용</th>
                                 <th style="width:100px">스레드</th>
                                 <th style="width:80px">좋아요</th>
@@ -30,6 +31,7 @@
                         <tbody>
                             <tr th:each="comment : ${comments}">
                                 <td th:text="${comment.id}"></td>
+                                <td th:text="${comment.nickname}" class="small text-muted"></td>
                                 <td th:text="${comment.content}"></td>
                                 <td>
                                     <a th:href="@{/admin/threads/{id}(id=${comment.thread.id})}"
@@ -46,7 +48,7 @@
                                 </td>
                             </tr>
                             <tr th:if="${comments.isEmpty()}">
-                                <td colspan="6" class="text-center text-muted py-4">댓글이 없습니다.</td>
+                                <td colspan="7" class="text-center text-muted py-4">댓글이 없습니다.</td>
                             </tr>
                         </tbody>
                     </table>

@@ -38,6 +38,7 @@ public class CommentService {
 
         Comment comment = Comment.builder()
                 .thread(thread)
+                .nickname(request.nickname())
                 .content(request.content())
                 .password(encodedPassword)
                 .build();
@@ -47,6 +48,7 @@ public class CommentService {
 
         return new CommentCreateResponse(
                 saved.getId(),
+                saved.getNickname(),
                 saved.getContent(),
                 saved.getLikeCount() != null ? saved.getLikeCount() : 0,
                 saved.getCreatedAt(),

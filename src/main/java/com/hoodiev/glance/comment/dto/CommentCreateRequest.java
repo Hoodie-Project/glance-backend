@@ -6,6 +6,9 @@ import jakarta.validation.constraints.Size;
 
 @Schema(description = "댓글 작성 요청")
 public record CommentCreateRequest(
+        @Schema(description = "닉네임 (최대 20자)", example = "익명의 고양이", maxLength = 20, requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotBlank @Size(max = 20) String nickname,
+
         @Schema(description = "댓글 내용 (최대 300자)", example = "저도 궁금해요", maxLength = 300, requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank @Size(max = 300) String content,
 

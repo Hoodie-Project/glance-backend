@@ -31,13 +31,13 @@ class CommentControllerTest {
     @Test
     void POST_comments_성공_201() throws Exception {
         CommentCreateResponse response = new CommentCreateResponse(
-                1L, "댓글내용", 0, LocalDateTime.now(), "auto1234");
+                1L, null, "댓글내용", 0, LocalDateTime.now(), "auto1234");
 
         given(commentService.create(eq(1L), any())).willReturn(response);
 
         mockMvc.perform(post("/api/threads/1/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CommentCreateRequest("댓글내용", null))))
+                        .content(objectMapper.writeValueAsString(new CommentCreateRequest("닉네임", "댓글내용", null))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.content").value("댓글내용"));
     }
@@ -48,7 +48,7 @@ class CommentControllerTest {
 
         mockMvc.perform(post("/api/threads/999/comments")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CommentCreateRequest("댓글", null))))
+                        .content(objectMapper.writeValueAsString(new CommentCreateRequest("닉네임", "댓글", null))))
                 .andExpect(status().isNotFound());
     }
 
