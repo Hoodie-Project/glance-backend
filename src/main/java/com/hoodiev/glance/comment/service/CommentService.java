@@ -13,6 +13,8 @@ import com.hoodiev.glance.common.util.PasswordGenerator;
 import com.hoodiev.glance.thread.entity.Thread;
 import com.hoodiev.glance.thread.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CommentService {
+
+    private static final Logger log = LoggerFactory.getLogger(CommentService.class);
 
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
@@ -49,6 +53,7 @@ public class CommentService {
 
         Comment saved = commentRepository.save(comment);
         threadRepository.incrementCommentCount(threadId);
+        log.info("Comment created - id={}, threadId={}", saved.getId(), threadId);
 
         return new CommentCreateResponse(
                 saved.getId(),
@@ -75,6 +80,7 @@ public class CommentService {
         commentLikeRepository.deleteAllByCommentId(commentId);
         commentRepository.delete(comment);
         threadRepository.decrementCommentCount(threadId);
+        log.info("Comment deleted - id={}, threadId={}", commentId, threadId);
     }
 
     @Transactional

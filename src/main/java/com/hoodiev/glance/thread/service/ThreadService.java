@@ -27,6 +27,8 @@ import com.hoodiev.glance.thread.dto.ThreadDetailResponse;
 import com.hoodiev.glance.thread.dto.ThreadListResponse;
 import com.hoodiev.glance.thread.dto.ThreadPinResponse;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +46,8 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ThreadService {
 
+    private static final Logger log = LoggerFactory.getLogger(ThreadService.class);
+
     private final ThreadRepository threadRepository;
     private final ThreadLikeRepository threadLikeRepository;
     private final CommentRepository commentRepository;
@@ -56,6 +60,7 @@ public class ThreadService {
     @Transactional
     public ThreadCreateResponse create(ThreadCreateRequest request, String clientIp, String userAgent) {
         if (!rateLimiter.tryAcquire(clientIp)) {
+            log.warn("Rate limit exceeded - ip={}", clientIp);
             throw new RateLimitExceededException();
         }
 
@@ -83,6 +88,7 @@ public class ThreadService {
                 .build();
 
         Thread saved = threadRepository.save(thread);
+        log.info("Thread created - id={}, ip={}", saved.getId(), clientIp);
 
         return new ThreadCreateResponse(
                 saved.getId(), saved.getNickname(), saved.getTitle(), saved.getContent(),
@@ -212,6 +218,7 @@ public class ThreadService {
         }
 
         thread.softDelete();
+        log.info("Thread deleted - id={}", id);
     }
 
     private Region findOrCreateRegion(LocationInfo location) {

@@ -1,2 +1,7 @@
 cors:
   allowed-origins: https://partyguham.com
+
+logging:
+  level:
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
