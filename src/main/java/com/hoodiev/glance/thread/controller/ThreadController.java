@@ -3,6 +3,7 @@ package com.hoodiev.glance.thread.controller;
 import com.hoodiev.glance.common.dto.DeleteRequest;
 import com.hoodiev.glance.common.dto.ErrorResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
+import com.hoodiev.glance.common.util.ClientIpExtractor;
 import com.hoodiev.glance.thread.entity.Gender;
 import com.hoodiev.glance.thread.service.ThreadService;
 import com.hoodiev.glance.thread.dto.DongMarkerResponse;
@@ -71,7 +72,7 @@ public class ThreadController {
     public ThreadCreateResponse create(
             @Valid @RequestBody ThreadCreateRequest request,
             HttpServletRequest http) {
-        return threadService.create(request, clientIp(http), http.getHeader("User-Agent"));
+        return threadService.create(request, ClientIpExtractor.extract(http), http.getHeader("User-Agent"));
     }
 
     @Operation(
@@ -259,7 +260,7 @@ public class ThreadController {
             @Parameter(description = "스레드 ID", example = "1", required = true)
             @PathVariable Long id,
             HttpServletRequest http) {
-        return threadService.toggleLike(id, clientIp(http));
+        return threadService.toggleLike(id, ClientIpExtractor.extract(http));
     }
 
     @Operation(
@@ -287,11 +288,4 @@ public class ThreadController {
         threadService.delete(id, request.password());
     }
 
-    private String clientIp(HttpServletRequest http) {
-        String forwarded = http.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return http.getRemoteAddr();
-    }
 }

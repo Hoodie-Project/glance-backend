@@ -4,6 +4,7 @@ import com.hoodiev.glance.comment.dto.CommentCreateRequest;
 import com.hoodiev.glance.comment.dto.CommentCreateResponse;
 import com.hoodiev.glance.comment.service.CommentService;
 import com.hoodiev.glance.common.dto.DeleteRequest;
+import com.hoodiev.glance.common.util.ClientIpExtractor;
 import com.hoodiev.glance.common.dto.ErrorResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -108,14 +109,7 @@ public class CommentController {
             @Parameter(description = "댓글 ID", example = "10", required = true)
             @PathVariable Long commentId,
             HttpServletRequest http) {
-        return commentService.toggleLike(threadId, commentId, clientIp(http));
+        return commentService.toggleLike(threadId, commentId, ClientIpExtractor.extract(http));
     }
 
-    private String clientIp(HttpServletRequest http) {
-        String forwarded = http.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
-        }
-        return http.getRemoteAddr();
-    }
 }

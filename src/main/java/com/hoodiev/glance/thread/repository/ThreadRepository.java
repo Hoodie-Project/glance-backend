@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -102,19 +101,19 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
     @EntityGraph(attributePaths = "region")
     Page<Thread> findByTitleContainingIgnoreCaseAndDeletedAtIsNull(String keyword, Pageable pageable);
 
-    @Transactional @Modifying
+    @Modifying
     @Query("UPDATE Thread t SET t.commentCount = t.commentCount + 1 WHERE t.id = :id")
     void incrementCommentCount(@Param("id") Long id);
 
-    @Transactional @Modifying
+    @Modifying
     @Query("UPDATE Thread t SET t.commentCount = t.commentCount - 1 WHERE t.id = :id")
     void decrementCommentCount(@Param("id") Long id);
 
-    @Transactional @Modifying
+    @Modifying
     @Query("UPDATE Thread t SET t.likeCount = t.likeCount + 1 WHERE t.id = :id")
     void incrementLikeCount(@Param("id") Long id);
 
-    @Transactional @Modifying
+    @Modifying
     @Query("UPDATE Thread t SET t.likeCount = t.likeCount - 1 WHERE t.id = :id")
     void decrementLikeCount(@Param("id") Long id);
 }
