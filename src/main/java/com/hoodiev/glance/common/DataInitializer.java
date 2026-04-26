@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 @Component
-@Profile("!prod")
+@Profile("dev")
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
 

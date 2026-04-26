@@ -35,6 +35,9 @@ dependencies {
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("org.springframework.boot:spring-boot-testcontainers")
+	testImplementation("org.testcontainers:junit-jupiter:1.21.3")
+	testImplementation("org.testcontainers:postgresql:1.21.3")
 	testCompileOnly("org.projectlombok:lombok")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testAnnotationProcessor("org.projectlombok:lombok")
@@ -42,4 +45,6 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+	// Colima mounts its Docker socket at a non-standard path; pass it to Testcontainers
+	environment("TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE", "/var/run/docker.sock")
 }
