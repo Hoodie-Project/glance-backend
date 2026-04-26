@@ -151,7 +151,7 @@ public class ThreadService {
     public ThreadDetailResponse getThread(Long id) {
         Thread thread = threadRepository.findById(id)
                 .filter(t -> t.getDeletedAt() == null)
-                .orElseThrow(() -> new EntityNotFoundException("Thread", id));
+                .orElseThrow(() -> new EntityNotFoundException("스레드", id));
 
         List<CommentResponse> comments = commentRepository.findByThreadIdOrderByCreatedAtAsc(id)
                 .stream()
@@ -179,7 +179,7 @@ public class ThreadService {
     public LikeToggleResponse toggleLike(Long id, String clientIp) {
         Thread thread = threadRepository.findById(id)
                 .filter(t -> t.getDeletedAt() == null)
-                .orElseThrow(() -> new EntityNotFoundException("Thread", id));
+                .orElseThrow(() -> new EntityNotFoundException("스레드", id));
 
         Optional<ThreadLike> existing = threadLikeRepository.findByThreadIdAndIpAddress(id, clientIp);
         boolean liked;
@@ -205,7 +205,7 @@ public class ThreadService {
     public void delete(Long id, String rawPassword) {
         Thread thread = threadRepository.findById(id)
                 .filter(t -> t.getDeletedAt() == null)
-                .orElseThrow(() -> new EntityNotFoundException("Thread", id));
+                .orElseThrow(() -> new EntityNotFoundException("스레드", id));
 
         if (!passwordEncoder.matches(rawPassword, thread.getPassword())) {
             throw new InvalidPasswordException();

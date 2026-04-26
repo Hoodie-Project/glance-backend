@@ -16,7 +16,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    @GetMapping
+    @GetMapping({"", "/"})
     public String dashboard(Model model) {
         model.addAttribute("stats", adminService.getStats());
         return "admin/dashboard";

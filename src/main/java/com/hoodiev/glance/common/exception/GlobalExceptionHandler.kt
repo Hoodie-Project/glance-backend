@@ -1,35 +1,24 @@
 package com.hoodiev.glance.common.exception
 
 import com.hoodiev.glance.common.dto.ErrorResponse
-import org.springframework.http.HttpStatus
+import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
 
-    @ExceptionHandler(EntityNotFoundException::class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleNotFound(e: EntityNotFoundException) =
-        ErrorResponse(404, e.message!!, LocalDateTime.now())
+    private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
-    @ExceptionHandler(InvalidPasswordException::class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun handleInvalidPassword(e: InvalidPasswordException) =
-        ErrorResponse(403, e.message!!, LocalDateTime.now())
-
-    @ExceptionHandler(RateLimitExceededException::class)
-    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    fun handleRateLimit(e: RateLimitExceededException) =
-        ErrorResponse(429, e.message!!, LocalDateTime.now())
-
-    @ExceptionHandler(BoundingBoxTooLargeException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleBoundingBoxTooLarge(e: BoundingBoxTooLargeException) =
-        ErrorResponse(400, e.message!!, LocalDateTime.now())
+    @ExceptionHandler(BusinessException::class)
+    fun handleBusiness(e: BusinessException): ResponseEntity<ErrorResponse> =
+        ResponseEntity.status(e.status)
+            .body(ErrorResponse(e.status.value(), e.code, e.message ?: "오류가 발생했습니다.", LocalDateTime.now()))
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -37,6 +26,13 @@ class GlobalExceptionHandler {
         val message = e.bindingResult.fieldErrors
             .joinToString(", ") { "${it.field}: ${it.defaultMessage}" }
             .ifBlank { "Validation failed" }
-        return ErrorResponse(400, message, LocalDateTime.now())
+        return ErrorResponse(400, "VALIDATION_FAILED", message, LocalDateTime.now())
+    }
+
+    @ExceptionHandler(Exception::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleUnexpected(e: Exception): ErrorResponse {
+        log.error("Unexpected error", e)
+        return ErrorResponse(500, "INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다.", LocalDateTime.now())
     }
 }

@@ -34,7 +34,7 @@ public class CommentService {
     public CommentCreateResponse create(Long threadId, CommentCreateRequest request) {
         Thread thread = threadRepository.findById(threadId)
                 .filter(t -> t.getDeletedAt() == null)
-                .orElseThrow(() -> new EntityNotFoundException("Thread", threadId));
+                .orElseThrow(() -> new EntityNotFoundException("스레드", threadId));
 
         boolean generated = request.password() == null || request.password().isBlank();
         String rawPassword = generated ? passwordGenerator.generate() : request.password();
@@ -62,10 +62,10 @@ public class CommentService {
     @Transactional
     public void delete(Long threadId, Long commentId, String rawPassword) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment", commentId));
+                .orElseThrow(() -> new EntityNotFoundException("댓글", commentId));
 
         if (!comment.getThread().getId().equals(threadId)) {
-            throw new EntityNotFoundException("Comment", commentId);
+            throw new EntityNotFoundException("댓글", commentId);
         }
 
         if (!passwordEncoder.matches(rawPassword, comment.getPassword())) {
@@ -80,10 +80,10 @@ public class CommentService {
     @Transactional
     public LikeToggleResponse toggleLike(Long threadId, Long commentId, String clientIp) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new EntityNotFoundException("Comment", commentId));
+                .orElseThrow(() -> new EntityNotFoundException("댓글", commentId));
 
         if (!comment.getThread().getId().equals(threadId)) {
-            throw new EntityNotFoundException("Comment", commentId);
+            throw new EntityNotFoundException("댓글", commentId);
         }
 
         int current = comment.getLikeCount() != null ? comment.getLikeCount() : 0;
