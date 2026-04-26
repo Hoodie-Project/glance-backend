@@ -27,7 +27,7 @@ class ThreadServiceIntegrationTest extends AbstractIntegrationTest {
     private StringRedisTemplate redisTemplate;
 
     @BeforeEach
-    void clearRedis() {
+    void Redis_초기화() {
         redisTemplate.execute((RedisCallback<Object>) conn -> {
             conn.serverCommands().flushAll();
             return null;
@@ -35,7 +35,7 @@ class ThreadServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void softDeletedThreadIsNotFound() {
+    void 삭제된_스레드는_조회되지_않는다() {
         ThreadCreateResponse created = threadService.create(
                 threadRequest("pw1234"),
                 "10.0.0.1",
@@ -49,7 +49,7 @@ class ThreadServiceIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void commentOnDeletedThreadIsRejected() {
+    void 삭제된_스레드에_댓글을_달_수_없다() {
         ThreadCreateResponse created = threadService.create(
                 threadRequest("pw1234"),
                 "10.0.0.2",

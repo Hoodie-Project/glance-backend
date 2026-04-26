@@ -13,12 +13,12 @@ class PasswordGeneratorTest {
     private final PasswordGenerator generator = new PasswordGenerator();
 
     @Test
-    void generatesEightCharacterPassword() {
+    void 비밀번호는_8자리다() {
         assertThat(generator.generate()).hasSize(8);
     }
 
     @Test
-    void doesNotContainAmbiguousCharacters() {
+    void 헷갈리는_문자가_포함되지_않는다() {
         Set<String> passwords = IntStream.range(0, 200)
                 .mapToObj(i -> generator.generate())
                 .collect(Collectors.toSet());
@@ -29,7 +29,7 @@ class PasswordGeneratorTest {
     }
 
     @Test
-    void producesUniquePasswords() {
+    void 매번_다른_비밀번호가_생성된다() {
         Set<String> passwords = IntStream.range(0, 50)
                 .mapToObj(i -> generator.generate())
                 .collect(Collectors.toSet());

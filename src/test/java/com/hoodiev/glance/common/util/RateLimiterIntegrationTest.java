@@ -18,7 +18,7 @@ class RateLimiterIntegrationTest extends AbstractIntegrationTest {
     private StringRedisTemplate redisTemplate;
 
     @BeforeEach
-    void clearRedis() {
+    void Redis_초기화() {
         redisTemplate.execute((RedisCallback<Object>) conn -> {
             conn.serverCommands().flushAll();
             return null;
@@ -26,14 +26,14 @@ class RateLimiterIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void allowsThreeRequestsForSameKey() {
+    void 동일_IP는_3번까지_허용된다() {
         assertThat(rateLimiter.tryAcquire("test-ip")).isTrue();
         assertThat(rateLimiter.tryAcquire("test-ip")).isTrue();
         assertThat(rateLimiter.tryAcquire("test-ip")).isTrue();
     }
 
     @Test
-    void blocksFourthRequestForSameKey() {
+    void 동일_IP의_4번째_요청은_차단된다() {
         rateLimiter.tryAcquire("test-ip");
         rateLimiter.tryAcquire("test-ip");
         rateLimiter.tryAcquire("test-ip");
@@ -42,7 +42,7 @@ class RateLimiterIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void differentKeysDoNotShareLimit() {
+    void 다른_IP는_독립적으로_카운트된다() {
         rateLimiter.tryAcquire("ip-a");
         rateLimiter.tryAcquire("ip-a");
         rateLimiter.tryAcquire("ip-a");
