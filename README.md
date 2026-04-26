@@ -1,26 +1,25 @@
 # glance-backend
 
-Spring Boot backend for Glance.
+위치 기반 익명 커뮤니티 앱 Glance의 백엔드 서버.
 
-## Requirements
+## 기술 스택
 
-- Java 21
-- PostgreSQL
+Java 21 · Spring Boot 4.0.5 · PostgreSQL 16 · Redis 7 · Docker
 
-## Getting Started
+## 문서
+
+- [개발 환경 세팅](docs/setup.md)
+- [아키텍처](docs/architecture.md)
+- [데이터베이스](docs/database.md)
+- [API 가이드](docs/api.md)
+- [배포 가이드](docs/deployment.md)
+- [PRD](docs/prd.md)
+
+## 빠른 시작
 
 ```bash
-# Run with local profile
-./gradlew bootRun --args='--spring.profiles.active=local'
-
-# Run tests
-./gradlew test
+docker compose up -d postgres redis
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
-## Tech Stack
-
-- Java 21
-- Spring Boot 4.0
-- Gradle (Kotlin DSL)
-- PostgreSQL
-- Spring Security
+Swagger UI: `http://localhost:8080/swagger-ui/index.html`
