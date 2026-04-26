@@ -1,8 +1,10 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.controller;
 
 import com.hoodiev.glance.common.dto.DeleteRequest;
 import com.hoodiev.glance.common.dto.ErrorResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
+import com.hoodiev.glance.thread.entity.Gender;
+import com.hoodiev.glance.thread.service.ThreadService;
 import com.hoodiev.glance.thread.dto.DongMarkerResponse;
 import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;

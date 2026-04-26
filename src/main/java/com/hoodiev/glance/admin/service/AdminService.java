@@ -1,12 +1,12 @@
-package com.hoodiev.glance.admin;
+package com.hoodiev.glance.admin.service;
 
-import com.hoodiev.glance.comment.Comment;
-import com.hoodiev.glance.comment.CommentLikeRepository;
-import com.hoodiev.glance.comment.CommentRepository;
-import com.hoodiev.glance.region.Region;
-import com.hoodiev.glance.region.RegionRepository;
-import com.hoodiev.glance.thread.Thread;
-import com.hoodiev.glance.thread.ThreadRepository;
+import com.hoodiev.glance.comment.entity.Comment;
+import com.hoodiev.glance.comment.repository.CommentLikeRepository;
+import com.hoodiev.glance.comment.repository.CommentRepository;
+import com.hoodiev.glance.region.entity.Region;
+import com.hoodiev.glance.region.repository.RegionRepository;
+import com.hoodiev.glance.thread.entity.Thread;
+import com.hoodiev.glance.thread.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

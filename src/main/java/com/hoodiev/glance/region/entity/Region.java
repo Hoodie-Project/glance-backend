@@ -1,4 +1,4 @@
-package com.hoodiev.glance.region;
+package com.hoodiev.glance.region.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

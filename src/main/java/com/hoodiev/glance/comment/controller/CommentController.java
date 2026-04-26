@@ -1,7 +1,8 @@
-package com.hoodiev.glance.comment;
+package com.hoodiev.glance.comment.controller;
 
 import com.hoodiev.glance.comment.dto.CommentCreateRequest;
 import com.hoodiev.glance.comment.dto.CommentCreateResponse;
+import com.hoodiev.glance.comment.service.CommentService;
 import com.hoodiev.glance.common.dto.DeleteRequest;
 import com.hoodiev.glance.common.dto.ErrorResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;

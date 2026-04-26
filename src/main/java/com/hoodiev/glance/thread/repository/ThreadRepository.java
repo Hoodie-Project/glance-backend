@@ -1,5 +1,6 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.repository;
 
+import com.hoodiev.glance.thread.entity.Thread;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,6 +1,6 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.entity;
 
-import com.hoodiev.glance.region.Region;
+import com.hoodiev.glance.region.entity.Region;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

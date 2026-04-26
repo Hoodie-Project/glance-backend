@@ -1,4 +1,4 @@
-package com.hoodiev.glance.admin;
+package com.hoodiev.glance.admin.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

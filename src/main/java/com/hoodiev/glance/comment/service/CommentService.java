@@ -1,13 +1,17 @@
-package com.hoodiev.glance.comment;
+package com.hoodiev.glance.comment.service;
 
 import com.hoodiev.glance.comment.dto.CommentCreateRequest;
 import com.hoodiev.glance.comment.dto.CommentCreateResponse;
+import com.hoodiev.glance.comment.entity.Comment;
+import com.hoodiev.glance.comment.entity.CommentLike;
+import com.hoodiev.glance.comment.repository.CommentLikeRepository;
+import com.hoodiev.glance.comment.repository.CommentRepository;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
 import com.hoodiev.glance.common.exception.EntityNotFoundException;
 import com.hoodiev.glance.common.exception.InvalidPasswordException;
 import com.hoodiev.glance.common.util.PasswordGenerator;
-import com.hoodiev.glance.thread.Thread;
-import com.hoodiev.glance.thread.ThreadRepository;
+import com.hoodiev.glance.thread.entity.Thread;
+import com.hoodiev.glance.thread.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

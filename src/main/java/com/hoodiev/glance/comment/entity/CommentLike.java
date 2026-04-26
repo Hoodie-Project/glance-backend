@@ -1,4 +1,4 @@
-package com.hoodiev.glance.comment;
+package com.hoodiev.glance.comment.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

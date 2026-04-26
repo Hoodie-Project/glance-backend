@@ -1,4 +1,4 @@
-package com.hoodiev.glance.region;
+package com.hoodiev.glance.region.entity;
 
 public record LocationInfo(
         String legalCode,

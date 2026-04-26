@@ -1,8 +1,8 @@
 package com.hoodiev.glance.thread.dto;
 
-import com.hoodiev.glance.thread.AnimalLook;
-import com.hoodiev.glance.thread.Gender;
-import com.hoodiev.glance.thread.VibeStyle;
+import com.hoodiev.glance.thread.entity.AnimalLook;
+import com.hoodiev.glance.thread.entity.Gender;
+import com.hoodiev.glance.thread.entity.VibeStyle;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

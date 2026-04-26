@@ -1,4 +1,4 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

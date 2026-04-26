@@ -1,6 +1,6 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.service;
 
-import com.hoodiev.glance.comment.CommentRepository;
+import com.hoodiev.glance.comment.repository.CommentRepository;
 import com.hoodiev.glance.comment.dto.CommentResponse;
 import com.hoodiev.glance.common.dto.LikeToggleResponse;
 import com.hoodiev.glance.common.exception.BoundingBoxTooLargeException;
@@ -9,13 +9,16 @@ import com.hoodiev.glance.common.exception.InvalidPasswordException;
 import com.hoodiev.glance.common.exception.RateLimitExceededException;
 import com.hoodiev.glance.common.util.PasswordGenerator;
 import com.hoodiev.glance.common.util.RateLimiter;
-import com.hoodiev.glance.region.GeocodingService;
-import com.hoodiev.glance.region.LocationInfo;
-import java.util.ArrayList;
-import java.util.HashSet;
-import com.hoodiev.glance.region.Region;
-import com.hoodiev.glance.region.RegionRepository;
+import com.hoodiev.glance.region.service.GeocodingService;
+import com.hoodiev.glance.region.entity.LocationInfo;
+import com.hoodiev.glance.region.entity.Region;
+import com.hoodiev.glance.region.repository.RegionRepository;
 import com.hoodiev.glance.region.dto.RegionResponse;
+import com.hoodiev.glance.thread.entity.Gender;
+import com.hoodiev.glance.thread.entity.Thread;
+import com.hoodiev.glance.thread.entity.ThreadLike;
+import com.hoodiev.glance.thread.repository.ThreadLikeRepository;
+import com.hoodiev.glance.thread.repository.ThreadRepository;
 import com.hoodiev.glance.thread.dto.DongMarkerResponse;
 import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
@@ -31,6 +34,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 

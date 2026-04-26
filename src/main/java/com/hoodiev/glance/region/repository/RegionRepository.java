@@ -1,5 +1,6 @@
-package com.hoodiev.glance.region;
+package com.hoodiev.glance.region.repository;
 
+import com.hoodiev.glance.region.entity.Region;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

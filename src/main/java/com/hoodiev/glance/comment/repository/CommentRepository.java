@@ -1,5 +1,6 @@
-package com.hoodiev.glance.comment;
+package com.hoodiev.glance.comment.repository;
 
+import com.hoodiev.glance.comment.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

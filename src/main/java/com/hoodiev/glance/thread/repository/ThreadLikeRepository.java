@@ -1,5 +1,6 @@
-package com.hoodiev.glance.thread;
+package com.hoodiev.glance.thread.repository;
 
+import com.hoodiev.glance.thread.entity.ThreadLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

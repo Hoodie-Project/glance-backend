@@ -1,5 +1,6 @@
-package com.hoodiev.glance.admin;
+package com.hoodiev.glance.admin.controller;
 
+import com.hoodiev.glance.admin.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;

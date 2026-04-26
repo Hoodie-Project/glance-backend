@@ -1,5 +1,6 @@
-package com.hoodiev.glance.region
+package com.hoodiev.glance.region.service
 
+import com.hoodiev.glance.region.entity.LocationInfo
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference

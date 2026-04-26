@@ -1,6 +1,6 @@
 package com.hoodiev.glance.region.dto;
 
-import com.hoodiev.glance.region.Region;
+import com.hoodiev.glance.region.entity.Region;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "지역 정보")
