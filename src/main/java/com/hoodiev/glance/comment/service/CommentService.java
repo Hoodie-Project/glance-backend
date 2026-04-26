@@ -66,6 +66,10 @@ public class CommentService {
 
     @Transactional
     public void delete(Long threadId, Long commentId, String rawPassword) {
+        threadRepository.findById(threadId)
+                .filter(t -> t.getDeletedAt() == null)
+                .orElseThrow(() -> new EntityNotFoundException("스레드", threadId));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("댓글", commentId));
 
