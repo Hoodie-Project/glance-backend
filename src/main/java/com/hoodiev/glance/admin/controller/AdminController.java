@@ -56,8 +56,12 @@ public class AdminController {
     }
 
     @GetMapping("/comments")
-    public String comments(@PageableDefault(size = 20) Pageable pageable, Model model) {
-        model.addAttribute("comments", adminService.getComments(pageable));
+    public String comments(
+            @RequestParam(required = false) Boolean showDeleted,
+            @PageableDefault(size = 20) Pageable pageable,
+            Model model) {
+        model.addAttribute("comments", adminService.getComments(showDeleted, pageable));
+        model.addAttribute("showDeleted", showDeleted != null && showDeleted);
         return "admin/comments";
     }
 
@@ -65,6 +69,13 @@ public class AdminController {
     public String deleteComment(@PathVariable Long id, RedirectAttributes ra) {
         adminService.deleteComment(id);
         ra.addFlashAttribute("message", "댓글이 삭제됐습니다.");
+        return "redirect:/admin/comments";
+    }
+
+    @PostMapping("/comments/{id}/restore")
+    public String restoreComment(@PathVariable Long id, RedirectAttributes ra) {
+        adminService.restoreComment(id);
+        ra.addFlashAttribute("message", "댓글이 복구됐습니다.");
         return "redirect:/admin/comments";
     }
 

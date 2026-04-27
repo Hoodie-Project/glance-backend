@@ -50,6 +50,10 @@ public class Comment {
         this.deletedAt = LocalDateTime.now();
     }
 
+    public void restore() {
+        this.deletedAt = null;
+    }
+
     @Builder
     public Comment(Thread thread, String nickname, String content, String password) {
         this.thread = thread;

@@ -61,11 +61,14 @@ public class AdminService {
     }
 
     public List<Comment> getCommentsByThread(Long threadId) {
-        return commentRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
+        return commentRepository.findAllByThreadIdIncludingDeleted(threadId);
     }
 
-    public Page<Comment> getComments(Pageable pageable) {
-        return commentRepository.findAll(pageable);
+    public Page<Comment> getComments(Boolean showDeleted, Pageable pageable) {
+        if (showDeleted != null && showDeleted) {
+            return commentRepository.findAll(pageable);
+        }
+        return commentRepository.findByDeletedAtIsNull(pageable);
     }
 
     public List<Region> getRegions() {
@@ -88,9 +91,16 @@ public class AdminService {
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + commentId));
-        commentLikeRepository.deleteAllByCommentId(commentId);
-        commentRepository.delete(comment);
+        comment.softDelete();
         threadRepository.decrementCommentCount(comment.getThread().getId());
+    }
+
+    @Transactional
+    public void restoreComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("Comment not found: " + commentId));
+        comment.restore();
+        threadRepository.incrementCommentCount(comment.getThread().getId());
     }
 
     public record AdminStats(
