@@ -5,6 +5,10 @@ import com.hoodiev.glance.comment.repository.CommentLikeRepository;
 import com.hoodiev.glance.comment.repository.CommentRepository;
 import com.hoodiev.glance.region.entity.Region;
 import com.hoodiev.glance.region.repository.RegionRepository;
+import com.hoodiev.glance.report.entity.Report;
+import com.hoodiev.glance.report.entity.ReportStatus;
+import com.hoodiev.glance.report.entity.ReportTargetType;
+import com.hoodiev.glance.report.repository.ReportRepository;
 import com.hoodiev.glance.thread.entity.Thread;
 import com.hoodiev.glance.thread.repository.ThreadRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +30,7 @@ public class AdminService {
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final RegionRepository regionRepository;
+    private final ReportRepository reportRepository;
 
     public AdminStats getStats() {
         long totalThreads = threadRepository.count();
@@ -36,7 +41,8 @@ public class AdminService {
         long todayThreads = threadRepository.countByCreatedAtBetween(
                 LocalDate.now().atStartOfDay(),
                 LocalDate.now().plusDays(1).atStartOfDay());
-        return new AdminStats(totalThreads, activeThreads, deletedThreads, totalComments, totalRegions, todayThreads);
+        long pendingReports = reportRepository.countByStatus(ReportStatus.PENDING);
+        return new AdminStats(totalThreads, activeThreads, deletedThreads, totalComments, totalRegions, todayThreads, pendingReports);
     }
 
     public Page<Thread> getThreads(String keyword, Boolean showDeleted, Pageable pageable) {
@@ -103,12 +109,38 @@ public class AdminService {
         threadRepository.incrementCommentCount(comment.getThread().getId());
     }
 
+    public Page<Report> getReports(ReportStatus status, ReportTargetType targetType, Pageable pageable) {
+        if (status != null && targetType != null) {
+            return reportRepository.findByStatusAndTargetTypeOrderByCreatedAtDesc(status, targetType, pageable);
+        } else if (status != null) {
+            return reportRepository.findByStatusOrderByCreatedAtDesc(status, pageable);
+        } else if (targetType != null) {
+            return reportRepository.findByTargetTypeOrderByCreatedAtDesc(targetType, pageable);
+        }
+        return reportRepository.findAllByOrderByCreatedAtDesc(pageable);
+    }
+
+    @Transactional
+    public void resolveReport(Long reportId) {
+        reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId))
+                .resolve();
+    }
+
+    @Transactional
+    public void dismissReport(Long reportId) {
+        reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report not found: " + reportId))
+                .dismiss();
+    }
+
     public record AdminStats(
             long totalThreads,
             long activeThreads,
             long deletedThreads,
             long totalComments,
             long totalRegions,
-            long todayThreads
+            long todayThreads,
+            long pendingReports
     ) {}
 }

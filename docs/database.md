@@ -6,6 +6,8 @@
 regions ──< threads ──< comments
                   └──< thread_likes
                   └──< comment_likes (comment_id 기반)
+
+reports (target_type + target_id로 threads 또는 comments 참조, FK 없음)
 ```
 
 ## 테이블 상세
@@ -46,6 +48,7 @@ regions ──< threads ──< comments
 | password | VARCHAR | BCrypt 인코딩 |
 | like_count | INT | 기본값 0 |
 | created_at | TIMESTAMP | 불변 |
+| deleted_at | TIMESTAMP | 소프트 삭제일시, null이면 활성 |
 
 ### thread_likes
 
@@ -68,6 +71,25 @@ Unique Constraint: `(thread_id, ip_address)` — IP당 1회 좋아요 보장
 | created_at | TIMESTAMP | |
 
 Unique Constraint: `(comment_id, ip_address)`
+
+### reports
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| id | BIGINT PK | |
+| target_type | ENUM | THREAD / COMMENT |
+| target_id | BIGINT | 신고 대상 ID (FK 없음, Polymorphic) |
+| reason | ENUM | SPAM / PROFANITY / ADULT_CONTENT / PRIVACY_VIOLATION / FRAUD / OTHER |
+| description | VARCHAR(200) | 부가 설명 (선택) |
+| client_ip | VARCHAR(45) | 신고자 IP |
+| user_agent | VARCHAR(512) | 신고자 기기 정보 |
+| status | ENUM | PENDING / RESOLVED / DISMISSED |
+| created_at | TIMESTAMP | 신고일시 (불변) |
+| resolved_at | TIMESTAMP | 관리자 처리일시 |
+
+Unique Constraint: `(target_type, target_id, client_ip)` — 동일 IP당 동일 대상 1회 신고
+
+> 신고 데이터는 대상 콘텐츠가 삭제되어도 보존한다 (운영 이력 추적 목적).
 
 ### regions
 

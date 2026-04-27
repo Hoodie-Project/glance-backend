@@ -88,6 +88,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body d-flex align-items-center gap-3">
+                            <div class="bg-danger bg-opacity-10 rounded p-3">
+                                <i class="bi bi-flag fs-4 text-danger"></i>
+                            </div>
+                            <div>
+                                <div class="text-muted small">미처리 신고</div>
+                                <div class="fw-bold fs-4" th:text="${stats.pendingReports()}">0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -114,6 +125,14 @@
                         <div class="card-body text-center py-4">
                             <i class="bi bi-geo-alt fs-2 text-info mb-2"></i>
                             <div class="fw-semibold">지역 현황</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="/admin/reports" class="card border-0 shadow-sm text-decoration-none text-dark">
+                        <div class="card-body text-center py-4">
+                            <i class="bi bi-flag fs-2 text-danger mb-2"></i>
+                            <div class="fw-semibold">신고 관리</div>
                         </div>
                     </a>
                 </div>

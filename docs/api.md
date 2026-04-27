@@ -21,6 +21,7 @@
 | `INVALID_PASSWORD` | 403 | 비밀번호 불일치 |
 | `RATE_LIMIT_EXCEEDED` | 429 | IP 레이트 리밋 초과 |
 | `BOUNDING_BOX_TOO_LARGE` | 400 | 지도 조회 범위 초과 |
+| `ALREADY_REPORTED` | 409 | 동일 IP로 이미 신고한 대상 |
 | `VALIDATION_FAILED` | 400 | 요청 값 유효성 실패 |
 | `INTERNAL_SERVER_ERROR` | 500 | 서버 오류 |
 
@@ -48,8 +49,21 @@
 | DELETE | `/api/threads/{threadId}/comments/{commentId}` | 댓글 삭제 |
 | POST | `/api/threads/{threadId}/comments/{commentId}/likes` | 댓글 좋아요 토글 |
 
+### Report
+
+| 메서드 | 경로 | 설명 |
+|--------|------|------|
+| POST | `/api/reports` | 스레드 또는 댓글 신고 |
+
+**신고 사유 (reason)**: `SPAM` / `PROFANITY` / `ADULT_CONTENT` / `PRIVACY_VIOLATION` / `FRAUD` / `OTHER`
+
+**신고 대상 (targetType)**: `THREAD` / `COMMENT`
+
+신고는 관리자 검토 후 수동 처리되며, 접수 즉시 콘텐츠가 숨겨지지 않는다.
+
 ## 주요 제약사항
 
 - 스레드 생성: **IP당 1분에 최대 3건**
 - 지도 핀 조회: 위도/경도 범위 각 **0.072° 이하**
 - 비밀번호 미입력 시 서버가 자동 생성, 응답의 `password` 필드에 포함
+- 신고: **동일 IP당 동일 대상 1회**만 가능

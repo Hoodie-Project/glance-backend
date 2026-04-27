@@ -1,6 +1,8 @@
 package com.hoodiev.glance.admin.controller;
 
 import com.hoodiev.glance.admin.service.AdminService;
+import com.hoodiev.glance.report.entity.ReportStatus;
+import com.hoodiev.glance.report.entity.ReportTargetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -83,5 +85,33 @@ public class AdminController {
     public String regions(Model model) {
         model.addAttribute("regions", adminService.getRegions());
         return "admin/regions";
+    }
+
+    @GetMapping("/reports")
+    public String reports(
+            @RequestParam(required = false) ReportStatus status,
+            @RequestParam(required = false) ReportTargetType targetType,
+            @PageableDefault(size = 20) Pageable pageable,
+            Model model) {
+        model.addAttribute("reports", adminService.getReports(status, targetType, pageable));
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("selectedTargetType", targetType);
+        model.addAttribute("statuses", ReportStatus.values());
+        model.addAttribute("targetTypes", ReportTargetType.values());
+        return "admin/reports";
+    }
+
+    @PostMapping("/reports/{id}/resolve")
+    public String resolveReport(@PathVariable Long id, RedirectAttributes ra) {
+        adminService.resolveReport(id);
+        ra.addFlashAttribute("message", "신고가 처리됐습니다.");
+        return "redirect:/admin/reports";
+    }
+
+    @PostMapping("/reports/{id}/dismiss")
+    public String dismissReport(@PathVariable Long id, RedirectAttributes ra) {
+        adminService.dismissReport(id);
+        ra.addFlashAttribute("message", "신고가 기각됐습니다.");
+        return "redirect:/admin/reports";
     }
 }
