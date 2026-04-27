@@ -10,19 +10,22 @@ import com.hoodiev.glance.region.entity.Region;
 import com.hoodiev.glance.region.repository.RegionRepository;
 import com.hoodiev.glance.thread.entity.AnimalLook;
 import com.hoodiev.glance.thread.entity.Gender;
+import com.hoodiev.glance.thread.entity.Tag;
 import com.hoodiev.glance.thread.entity.Thread;
 import com.hoodiev.glance.thread.entity.ThreadLike;
+import com.hoodiev.glance.thread.entity.VibeStyle;
+import com.hoodiev.glance.thread.repository.TagRepository;
 import com.hoodiev.glance.thread.repository.ThreadLikeRepository;
 import com.hoodiev.glance.thread.repository.ThreadRepository;
-import com.hoodiev.glance.thread.entity.VibeStyle;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @Profile("dev")
@@ -30,6 +33,7 @@ import java.util.Set;
 public class DataInitializer implements CommandLineRunner {
 
     private final ThreadRepository threadRepository;
+    private final TagRepository tagRepository;
     private final ThreadLikeRepository threadLikeRepository;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
@@ -50,7 +54,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(37.5563).longitude(126.9236)
                 .region(resolveRegion(37.5563, 126.9236))
                 .gender(Gender.FEMALE)
-                .tags(List.of("홍대", "린넨셔츠", "오후산책"))
+                .tags(resolveTags("홍대", "린넨셔츠", "오후산책"))
                 .animalLooks(Set.of(AnimalLook.FOX, AnimalLook.CAT))
                 .vibeStyles(Set.of(VibeStyle.COLD_BEAUTY))
                 .password(pw).build());
@@ -62,7 +66,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(37.5448).longitude(127.0557)
                 .region(resolveRegion(37.5448, 127.0557))
                 .gender(Gender.MALE)
-                .tags(List.of("성수", "카페", "노트북"))
+                .tags(resolveTags("성수", "카페", "노트북"))
                 .animalLooks(Set.of(AnimalLook.DOG))
                 .vibeStyles(Set.of(VibeStyle.WARM_HANDSOME))
                 .password(pw).build());
@@ -74,7 +78,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(37.4979).longitude(127.0276)
                 .region(resolveRegion(37.4979, 127.0276))
                 .gender(Gender.FEMALE)
-                .tags(List.of("2호선", "강남", "독서"))
+                .tags(resolveTags("2호선", "강남", "독서"))
                 .animalLooks(Set.of(AnimalLook.RABBIT, AnimalLook.DEER))
                 .vibeStyles(Set.of(VibeStyle.HARMLESS, VibeStyle.FRESH))
                 .password(pw).build());
@@ -86,7 +90,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(37.5311).longitude(127.0674)
                 .region(resolveRegion(37.5311, 127.0674))
                 .gender(Gender.MALE)
-                .tags(List.of("한강", "뚝섬", "러닝"))
+                .tags(resolveTags("한강", "뚝섬", "러닝"))
                 .animalLooks(Set.of(AnimalLook.WOLF))
                 .vibeStyles(Set.of(VibeStyle.COLD_HANDSOME, VibeStyle.CLASSIC_HANDSOME))
                 .password(pw).build());
@@ -98,7 +102,7 @@ public class DataInitializer implements CommandLineRunner {
                 .latitude(37.5551).longitude(126.9097)
                 .region(resolveRegion(37.5551, 126.9097))
                 .gender(Gender.FEMALE)
-                .tags(List.of("망원", "망원시장", "주말"))
+                .tags(resolveTags("망원", "망원시장", "주말"))
                 .animalLooks(Set.of(AnimalLook.HAMSTER, AnimalLook.RABBIT))
                 .vibeStyles(Set.of(VibeStyle.WARM_BEAUTY, VibeStyle.FRESH))
                 .password(pw).build());
@@ -150,6 +154,12 @@ public class DataInitializer implements CommandLineRunner {
     private void addCommentLike(Comment comment, String ip) {
         commentLikeRepository.save(CommentLike.builder().commentId(comment.getId()).ipAddress(ip).build());
         commentRepository.incrementLikeCount(comment.getId());
+    }
+
+    private Set<Tag> resolveTags(String... names) {
+        return Arrays.stream(names)
+                .map(n -> tagRepository.findByName(n).orElseGet(() -> tagRepository.save(new Tag(n))))
+                .collect(Collectors.toSet());
     }
 
     private Region resolveRegion(double lat, double lng) {

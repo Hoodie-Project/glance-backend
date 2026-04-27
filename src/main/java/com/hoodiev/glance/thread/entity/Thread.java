@@ -8,9 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -49,14 +47,13 @@ public class Thread {
     @Column(length = 10)
     private Gender gender;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "thread_tags",
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "thread_tag",
             joinColumns = @JoinColumn(name = "thread_id"),
-            indexes = @Index(name = "idx_thread_tags_tag", columnList = "tag")
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    @Column(name = "tag")
-    private List<String> tags = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @ElementCollection(targetClass = AnimalLook.class)
     @CollectionTable(name = "thread_animal_looks", joinColumns = @JoinColumn(name = "thread_id"))
@@ -95,7 +92,7 @@ public class Thread {
 
     @Builder
     public Thread(String nickname, String title, String content, Double latitude, Double longitude,
-                  Region region, String password, Gender gender, List<String> tags,
+                  Region region, String password, Gender gender, Set<Tag> tags,
                   Set<AnimalLook> animalLooks, Set<VibeStyle> vibeStyles,
                   String clientIp, String userAgent) {
         this.nickname = nickname;
@@ -106,7 +103,7 @@ public class Thread {
         this.region = region;
         this.password = password;
         this.gender = gender;
-        this.tags = tags != null ? tags : new ArrayList<>();
+        this.tags = tags != null ? tags : new HashSet<>();
         this.animalLooks = animalLooks != null ? animalLooks : new HashSet<>();
         this.vibeStyles = vibeStyles != null ? vibeStyles : new HashSet<>();
         this.clientIp = clientIp;

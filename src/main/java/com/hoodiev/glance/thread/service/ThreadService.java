@@ -15,8 +15,10 @@ import com.hoodiev.glance.region.entity.Region;
 import com.hoodiev.glance.region.repository.RegionRepository;
 import com.hoodiev.glance.region.dto.RegionResponse;
 import com.hoodiev.glance.thread.entity.Gender;
+import com.hoodiev.glance.thread.entity.Tag;
 import com.hoodiev.glance.thread.entity.Thread;
 import com.hoodiev.glance.thread.entity.ThreadLike;
+import com.hoodiev.glance.thread.repository.TagRepository;
 import com.hoodiev.glance.thread.repository.ThreadLikeRepository;
 import com.hoodiev.glance.thread.repository.ThreadRepository;
 import com.hoodiev.glance.thread.dto.DongMarkerResponse;
@@ -36,10 +38,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.text.Normalizer;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +53,7 @@ public class ThreadService {
     private static final Logger log = LoggerFactory.getLogger(ThreadService.class);
 
     private final ThreadRepository threadRepository;
+    private final TagRepository tagRepository;
     private final ThreadLikeRepository threadLikeRepository;
     private final CommentRepository commentRepository;
     private final RegionRepository regionRepository;
@@ -71,6 +76,9 @@ public class ThreadService {
         String rawPassword = generated ? passwordGenerator.generate() : request.password();
         String encodedPassword = passwordEncoder.encode(rawPassword);
 
+        Set<Tag> tags = request.tags() == null ? new HashSet<>() :
+                request.tags().stream().map(this::findOrCreateTag).collect(Collectors.toSet());
+
         Thread thread = Thread.builder()
                 .nickname(request.nickname())
                 .title(request.title())
@@ -80,7 +88,7 @@ public class ThreadService {
                 .region(region)
                 .password(encodedPassword)
                 .gender(request.gender())
-                .tags(request.tags())
+                .tags(tags)
                 .animalLooks(request.animalLooks())
                 .vibeStyles(request.vibeStyles())
                 .clientIp(clientIp)
@@ -94,7 +102,7 @@ public class ThreadService {
                 saved.getId(), saved.getNickname(), saved.getTitle(), saved.getContent(),
                 saved.getLatitude(), saved.getLongitude(),
                 RegionResponse.from(saved.getRegion()),
-                saved.getGender(), saved.getTags(), saved.getAnimalLooks(), saved.getVibeStyles(),
+                saved.getGender(), tagNames(saved.getTags()), saved.getAnimalLooks(), saved.getVibeStyles(),
                 saved.getLikeCount(), saved.getCommentCount(),
                 saved.getCreatedAt(), generated ? rawPassword : null);
     }
@@ -174,7 +182,7 @@ public class ThreadService {
                 thread.getLatitude(), thread.getLongitude(),
                 RegionResponse.from(thread.getRegion()),
                 thread.getGender(),
-                new ArrayList<>(thread.getTags()),
+                tagNames(thread.getTags()),
                 new HashSet<>(thread.getAnimalLooks()),
                 new HashSet<>(thread.getVibeStyles()),
                 thread.getLikeCount(), thread.getCommentCount(),
@@ -252,10 +260,23 @@ public class ThreadService {
                 thread.getLatitude(), thread.getLongitude(),
                 RegionResponse.from(thread.getRegion()),
                 thread.getGender(),
-                new ArrayList<>(thread.getTags()),
+                tagNames(thread.getTags()),
                 new HashSet<>(thread.getAnimalLooks()),
                 new HashSet<>(thread.getVibeStyles()),
                 thread.getLikeCount(), thread.getCommentCount(),
                 thread.getCreatedAt());
+    }
+
+    private Tag findOrCreateTag(String name) {
+        String normalized = Normalizer.normalize(name, Normalizer.Form.NFC)
+                .replaceAll("^#+", "")
+                .strip()
+                .replaceAll("\\s+", " ")
+                .toLowerCase();
+        return tagRepository.findByName(normalized).orElseGet(() -> tagRepository.save(new Tag(normalized)));
+    }
+
+    private List<String> tagNames(Set<Tag> tags) {
+        return tags.stream().map(Tag::getName).toList();
     }
 }

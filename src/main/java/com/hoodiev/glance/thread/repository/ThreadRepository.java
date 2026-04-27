@@ -78,11 +78,11 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
     @Query("""
             SELECT DISTINCT t FROM Thread t
             JOIN t.tags tag
-            WHERE tag = :tag
+            WHERE tag.name = :tagName
               AND t.deletedAt IS NULL
             ORDER BY t.createdAt DESC
             """)
-    Page<Thread> searchByTag(@Param("tag") String tag, Pageable pageable);
+    Page<Thread> searchByTag(@Param("tagName") String tagName, Pageable pageable);
 
     long countByDeletedAtIsNull();
 
