@@ -10,7 +10,8 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    List<Comment> findByThreadIdOrderByCreatedAtAsc(Long threadId);
+    @Query("SELECT c FROM Comment c WHERE c.thread.id = :threadId AND c.deletedAt IS NULL ORDER BY c.createdAt ASC")
+    List<Comment> findByThreadIdOrderByCreatedAtAsc(@Param("threadId") Long threadId);
 
     @Modifying
     void deleteAllByThreadId(Long threadId);

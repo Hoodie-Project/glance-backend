@@ -81,8 +81,7 @@ public class CommentService {
             throw new InvalidPasswordException();
         }
 
-        commentLikeRepository.deleteAllByCommentId(commentId);
-        commentRepository.delete(comment);
+        comment.softDelete();
         threadRepository.decrementCommentCount(threadId);
         log.info("Comment deleted - id={}, threadId={}", commentId, threadId);
     }
@@ -90,6 +89,7 @@ public class CommentService {
     @Transactional
     public LikeToggleResponse toggleLike(Long threadId, Long commentId, String clientIp) {
         Comment comment = commentRepository.findById(commentId)
+                .filter(c -> c.getDeletedAt() == null)
                 .orElseThrow(() -> new EntityNotFoundException("댓글", commentId));
 
         if (!comment.getThread().getId().equals(threadId)) {
