@@ -159,7 +159,12 @@ public class ThreadService {
     }
 
     public Page<ThreadListResponse> searchByTag(String tag, Pageable pageable) {
-        return threadRepository.searchByTag(tag, pageable).map(this::toListResponse);
+        String normalized = Normalizer.normalize(tag, Normalizer.Form.NFC)
+                .replaceAll("^#+", "")
+                .strip()
+                .replaceAll("\\s+", " ")
+                .toLowerCase();
+        return threadRepository.searchByTag(normalized, pageable).map(this::toListResponse);
     }
 
     public ThreadDetailResponse getThread(Long id) {

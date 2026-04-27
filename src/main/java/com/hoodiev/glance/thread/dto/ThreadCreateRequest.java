@@ -82,7 +82,7 @@ public record ThreadCreateRequest(
         @Schema(
                 description = """
                         자유 입력 해시태그 리스트. 선택. 최대 5개. 각 태그는 빈 문자열 불가.
-                        `#` 기호는 붙이지 말고 순수 문자열만 전송.
+                        서버에서 자동 정규화 처리: `#` 제거, 앞뒤 공백 제거, 내부 공백 압축, 소문자 변환.
                         `GET /api/threads/search?tag=...` 로 태그 검색 가능.
                         """,
                 example = "[\"홍대\",\"카페\",\"2번출구\"]",
