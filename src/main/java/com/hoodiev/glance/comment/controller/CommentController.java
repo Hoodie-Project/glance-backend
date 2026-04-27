@@ -61,14 +61,13 @@ public class CommentController {
     }
 
     @Operation(
-            summary = "댓글 삭제 (Hard Delete)",
+            summary = "댓글 삭제 (Soft Delete)",
             description = """
-                    요청 바디의 `password`가 작성 시 설정/발급된 비밀번호와 일치하면 댓글을 **완전 삭제** 합니다.
+                    요청 바디의 `password`가 작성 시 설정/발급된 비밀번호와 일치하면 댓글을 **소프트 삭제** 합니다.
 
-                    - 댓글에 달린 좋아요(`CommentLike`) row 도 함께 삭제
+                    - `deletedAt` 필드에 삭제 시각을 기록하며 DB에서 실제 제거되지 않음
                     - 부모 스레드의 `commentCount -= 1`
                     - 비밀번호 불일치 시 403 반환
-                    - 스레드는 Soft Delete 인 반면 댓글은 Hard Delete
                     """)
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "삭제 성공"),
