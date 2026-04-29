@@ -50,9 +50,23 @@ public class SecurityConfig {
 
     @Bean
     @Order(2)
+    public SecurityFilterChain swaggerFilterChain(HttpSecurity http, BCryptPasswordEncoder passwordEncoder,
+                                                   @Value("${admin.username}") String adminUsername,
+                                                   @Value("${admin.password}") String adminPassword) throws Exception {
+        http
+                .securityMatcher("/api/swagger-ui.html", "/api/swagger-ui/**", "/api/v3/api-docs/**")
+                .httpBasic(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .userDetailsService(adminUserDetailsService(passwordEncoder, adminUsername, adminPassword));
+        return http.build();
+    }
+
+    @Bean
+    @Order(3)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/api/**", "/swagger-ui/**", "/v3/api-docs/**")
+                .securityMatcher("/api/**")
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)

@@ -1,15 +1,16 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: glance-postgres-dev
+    container_name: glance-postgres-prod
+    restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5435:5432"
+      - "5432:5432"
     volumes:
-      - glance-postgres-data:/var/lib/postgresql/data
+      - glance-postgres-prod-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -18,16 +19,18 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: glance-redis-dev
+    container_name: glance-redis-prod
+    restart: unless-stopped
     ports:
-      - "6381:6379"
+      - "6379:6379"
     volumes:
-      - glance-redis-data:/data
+      - glance-redis-prod-data:/data
 
   app:
     build: .
-    container_name: glance-app-dev
-    env_file: .env.dev
+    container_name: glance-app-prod
+    restart: unless-stopped
+    env_file: .env.prod
     depends_on:
       postgres:
         condition: service_healthy
@@ -35,11 +38,11 @@ services:
         condition: service_started
     environment:
       REDIS_HOST: redis
-      SPRING_PROFILES_ACTIVE: dev
+      SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 8000
     ports:
-      - "8080:8000"
+      - "8000:8000"
 
 volumes:
-  glance-postgres-data:
-  glance-redis-data:
+  glance-postgres-prod-data:
+  glance-redis-prod-data:
