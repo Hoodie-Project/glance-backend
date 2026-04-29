@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(./gradlew *)",
+      "Bash(make *)",
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(find *)",
+      "Bash(grep *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(echo *)"
+    ],
+    "deny": [
+      "Bash(docker system prune*)",
+      "Bash(docker volume rm*)",
+      "Bash(docker volume prune*)",
+      "Bash(docker-compose down -v*)",
+      "Bash(rm -rf*)",
+      "Bash(cat .env*)",
+      "Bash(grep * .env*)",
+      "Bash(echo * .env*)",
+      "Read(.env*)",
+      "Bash(curl * .env*)",
+      "Bash(wget * .env*)"
+    ]
+  },
+  "autoCompactEnabled": true,
+  "language": "korean",
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
+}
