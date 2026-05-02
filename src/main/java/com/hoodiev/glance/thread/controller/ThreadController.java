@@ -6,7 +6,7 @@ import com.hoodiev.glance.common.dto.LikeToggleResponse;
 import com.hoodiev.glance.common.util.ClientIpExtractor;
 import com.hoodiev.glance.thread.entity.Gender;
 import com.hoodiev.glance.thread.service.ThreadService;
-import com.hoodiev.glance.thread.dto.DongMarkerResponse;
+import com.hoodiev.glance.thread.dto.ClusterMarkerResponse;
 import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
 import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
@@ -169,7 +169,8 @@ public class ThreadController {
                     - 지도 라이브러리의 `getBounds()` 값을 그대로 전달
 
                     ### 범위 제한
-                    - 위도/경도 각각 **0.072° 이하** (~8km). 초과 시 400 반환.
+                    - 가로(`neLng - swLng`)와 세로(`neLat - swLat`) **각각** 0.045°(~5km) 이하
+                    - 둘 중 하나라도 초과 시 400 반환
                     - 줌인 상태(핀 표시)에서만 호출할 것
                     """)
     @GetMapping("/map/pins")
@@ -196,20 +197,28 @@ public class ThreadController {
     }
 
     @Operation(
-            summary = "지도 동 마커 조회 (줌아웃)",
+            summary = "지도 클러스터 마커 조회 (줌아웃)",
             description = """
-                    현재 지도 화면(bounding box) 안의 스레드를 동 단위로 집계하여 반환합니다.
-                    줌아웃 상태에서 동 이름과 게시글 수를 마커로 표시할 때 사용.
+                    현재 지도 화면(bounding box) 안의 스레드를 밀집 지역 기준으로 집계하여 반환합니다.
+                    줌아웃 상태에서 스레드가 많은 지역에 원형 마커를 표시할 때 사용.
 
-                    ### 마커 좌표 (lat, lng)
-                    해당 동에 속한 스레드들의 위경도 평균값.
+                    ### 클러스터링 방식
+                    뷰포트 크기를 기준으로 격자 크기를 자동 계산하여 인접한 스레드들을 하나의 원으로 묶습니다.
+                    줌 레벨에 따라 격자 크기가 자동으로 조정됩니다.
 
                     ### 범위 제한
-                    - bbox가 넓어도 중심 기준 **±0.1°** (~11km)로 자동 클램핑.
-                    - 게시글 많은 동 상위 100개 반환.
+                    - 가로(`neLng - swLng`)와 세로(`neLat - swLat`) **각각** 0.27°(~30km) 이하
+                    - 둘 중 하나라도 초과 시 400 반환
+
+                    ### 반환값
+                    - lat, lng: 클러스터 내 스레드들의 평균 좌표
+                    - count: 클러스터 내 스레드 수
                     """)
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "조회 성공")
+    })
     @GetMapping("/map/dong")
-    public List<DongMarkerResponse> dongMarkers(
+    public List<ClusterMarkerResponse> clusters(
             @Parameter(description = "bounding box 남서 위도", example = "37.40", required = true)
             @RequestParam double swLat,
 
@@ -221,7 +230,7 @@ public class ThreadController {
 
             @Parameter(description = "bounding box 북동 경도", example = "127.10", required = true)
             @RequestParam double neLng) {
-        return threadService.getDongMarkers(swLat, swLng, neLat, neLng);
+        return threadService.getClusters(swLat, swLng, neLat, neLng);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")

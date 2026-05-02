@@ -58,22 +58,24 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             @Param("gender") String gender);
 
     @Query(value = """
-            SELECT r.sido, r.sigungu, r.dong,
-                   COUNT(t.id) as cnt, r.center_lat as lat, r.center_lng as lng
-            FROM regions r
-            JOIN threads t ON t.region_id = r.id AND t.deleted_at IS NULL
-            WHERE r.center_lat IS NOT NULL
-              AND r.center_lat BETWEEN :swLat AND :neLat
-              AND r.center_lng BETWEEN :swLng AND :neLng
-            GROUP BY r.id, r.sido, r.sigungu, r.dong, r.center_lat, r.center_lng
+            SELECT AVG(latitude) AS lat, AVG(longitude) AS lng, COUNT(id) AS cnt
+            FROM threads
+            WHERE deleted_at IS NULL
+              AND latitude IS NOT NULL
+              AND longitude IS NOT NULL
+              AND latitude BETWEEN :swLat AND :neLat
+              AND longitude BETWEEN :swLng AND :neLng
+            GROUP BY ROUND((latitude / :gridSize)::numeric) * :gridSize,
+                     ROUND((longitude / :gridSize)::numeric) * :gridSize
             ORDER BY cnt DESC
-            LIMIT 100
+            LIMIT 200
             """, nativeQuery = true)
-    List<Object[]> findDongMarkers(
+    List<Object[]> findClusters(
             @Param("swLat") double swLat,
             @Param("swLng") double swLng,
             @Param("neLat") double neLat,
-            @Param("neLng") double neLng);
+            @Param("neLng") double neLng,
+            @Param("gridSize") double gridSize);
 
     @Query("""
             SELECT DISTINCT t FROM Thread t
