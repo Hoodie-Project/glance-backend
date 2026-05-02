@@ -217,7 +217,7 @@ public class ThreadController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
-    @GetMapping("/map/dong")
+    @GetMapping("/map/clusters")
     public List<ClusterMarkerResponse> clusters(
             @Parameter(description = "bounding box 남서 위도", example = "37.40", required = true)
             @RequestParam double swLat,
@@ -230,7 +230,7 @@ public class ThreadController {
 
             @Parameter(description = "bounding box 북동 경도", example = "127.10", required = true)
             @RequestParam double neLng) {
-        return threadService.getClusters(swLat, swLng, neLat, neLng);
+        return threadService.getClusters(swLat, swLng, neLat, neLng, null);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")
