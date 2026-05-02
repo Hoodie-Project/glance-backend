@@ -58,24 +58,20 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
             @Param("gender") String gender);
 
     @Query(value = """
-            SELECT AVG(latitude) AS lat, AVG(longitude) AS lng, COUNT(id) AS cnt
+            SELECT latitude, longitude
             FROM threads
             WHERE deleted_at IS NULL
               AND latitude IS NOT NULL
               AND longitude IS NOT NULL
               AND latitude BETWEEN :swLat AND :neLat
               AND longitude BETWEEN :swLng AND :neLng
-            GROUP BY ROUND((latitude / :gridSize)::numeric) * :gridSize,
-                     ROUND((longitude / :gridSize)::numeric) * :gridSize
-            ORDER BY cnt DESC
-            LIMIT 200
+            LIMIT 2000
             """, nativeQuery = true)
-    List<Object[]> findClusters(
+    List<Object[]> findCoordinatesInBbox(
             @Param("swLat") double swLat,
             @Param("swLng") double swLng,
             @Param("neLat") double neLat,
-            @Param("neLng") double neLng,
-            @Param("gridSize") double gridSize);
+            @Param("neLng") double neLng);
 
     @Query("""
             SELECT DISTINCT t FROM Thread t
