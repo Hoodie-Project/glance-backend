@@ -21,7 +21,7 @@ import com.hoodiev.glance.thread.entity.ThreadLike;
 import com.hoodiev.glance.thread.repository.TagRepository;
 import com.hoodiev.glance.thread.repository.ThreadLikeRepository;
 import com.hoodiev.glance.thread.repository.ThreadRepository;
-import com.hoodiev.glance.thread.dto.DongMarkerResponse;
+import com.hoodiev.glance.thread.dto.ClusterMarkerResponse;
 import com.hoodiev.glance.thread.dto.FeedResponse;
 import com.hoodiev.glance.thread.dto.ThreadCreateRequest;
 import com.hoodiev.glance.thread.dto.ThreadCreateResponse;
@@ -123,8 +123,11 @@ public class ThreadService {
         return new FeedResponse(threads.stream().map(this::toListResponse).toList(), nextCursor, hasMore);
     }
 
-    private static final double MAX_PINS_SPAN = 0.072;    // ~8km
-    private static final double DONG_MAX_HALF_SPAN = 0.1; // 중심 기준 ±0.1° (~11km), 약 100동
+    private static final double MAX_PINS_SPAN = 0.045;    // ~5km
+    private static final double MAX_CLUSTER_SPAN = 0.27; // ~30km
+    private static final double CLUSTER_GRID_DIVISIONS = 10.0;
+    private static final double CLUSTER_GRID_MIN = 0.002;
+    private static final double CLUSTER_GRID_MAX = 0.1;
 
     public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng, Gender gender) {
         if (neLat - swLat > MAX_PINS_SPAN || neLng - swLng > MAX_PINS_SPAN)
@@ -138,23 +141,16 @@ public class ThreadService {
                 .toList();
     }
 
-    public List<DongMarkerResponse> getDongMarkers(double swLat, double swLng, double neLat, double neLng) {
-        double centerLat = (swLat + neLat) / 2;
-        double centerLng = (swLng + neLng) / 2;
-        double halfLat = Math.min((neLat - swLat) / 2, DONG_MAX_HALF_SPAN);
-        double halfLng = Math.min((neLng - swLng) / 2, DONG_MAX_HALF_SPAN);
-        double clampedSwLat = centerLat - halfLat;
-        double clampedSwLng = centerLng - halfLng;
-        double clampedNeLat = centerLat + halfLat;
-        double clampedNeLng = centerLng + halfLng;
-        return threadRepository.findDongMarkers(clampedSwLat, clampedSwLng, clampedNeLat, clampedNeLng).stream()
-                .map(row -> new DongMarkerResponse(
-                        (String) row[0],
-                        (String) row[1],
-                        (String) row[2],
-                        ((Number) row[3]).longValue(),
-                        ((Number) row[4]).doubleValue(),
-                        ((Number) row[5]).doubleValue()))
+    public List<ClusterMarkerResponse> getClusters(double swLat, double swLng, double neLat, double neLng) {
+        if (neLat - swLat > MAX_CLUSTER_SPAN || neLng - swLng > MAX_CLUSTER_SPAN)
+            throw new BoundingBoxTooLargeException(MAX_CLUSTER_SPAN);
+        double span = Math.max(neLat - swLat, neLng - swLng);
+        double gridSize = Math.clamp(span / CLUSTER_GRID_DIVISIONS, CLUSTER_GRID_MIN, CLUSTER_GRID_MAX);
+        return threadRepository.findClusters(swLat, swLng, neLat, neLng, gridSize).stream()
+                .map(row -> new ClusterMarkerResponse(
+                        ((Number) row[0]).doubleValue(),
+                        ((Number) row[1]).doubleValue(),
+                        ((Number) row[2]).longValue()))
                 .toList();
     }
 
