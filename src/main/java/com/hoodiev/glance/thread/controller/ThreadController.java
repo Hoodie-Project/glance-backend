@@ -210,6 +210,9 @@ public class ThreadController {
                     - 가로(`neLng - swLng`)와 세로(`neLat - swLat`) **각각** 0.27°(~30km) 이하
                     - 둘 중 하나라도 초과 시 400 반환
 
+                    ### 성별 필터
+                    - ALL: 전체, MALE: 남성, FEMALE: 여성 스레드만 클러스터링
+
                     ### 반환값
                     - lat, lng: 클러스터 내 스레드들의 평균 좌표
                     - count: 클러스터 내 스레드 수
