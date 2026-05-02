@@ -143,13 +143,14 @@ public class ThreadService {
                 .toList();
     }
 
-    public List<ClusterMarkerResponse> getClusters(double swLat, double swLng, double neLat, double neLng) {
+    public List<ClusterMarkerResponse> getClusters(double swLat, double swLng, double neLat, double neLng, Gender gender) {
         if (neLat - swLat > MAX_CLUSTER_SPAN || neLng - swLng > MAX_CLUSTER_SPAN)
             throw new BoundingBoxTooLargeException(MAX_CLUSTER_SPAN);
         double span = Math.max(neLat - swLat, neLng - swLng);
         double epsilon = Math.clamp(span / CLUSTER_EPSILON_DIVISIONS, CLUSTER_EPSILON_MIN, CLUSTER_EPSILON_MAX);
+        String genderParam = (gender == null || gender == Gender.ALL) ? null : gender.name();
 
-        List<DbscanClusterer.Point> points = threadRepository.findCoordinatesInBbox(swLat, swLng, neLat, neLng)
+        List<DbscanClusterer.Point> points = threadRepository.findCoordinatesInBbox(swLat, swLng, neLat, neLng, genderParam)
                 .stream()
                 .map(row -> new DbscanClusterer.Point(
                         ((Number) row[0]).doubleValue(),

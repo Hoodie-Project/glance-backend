@@ -203,12 +203,15 @@ public class ThreadController {
                     줌아웃 상태에서 스레드가 많은 지역에 원형 마커를 표시할 때 사용.
 
                     ### 클러스터링 방식
-                    뷰포트 크기를 기준으로 격자 크기를 자동 계산하여 인접한 스레드들을 하나의 원으로 묶습니다.
-                    줌 레벨에 따라 격자 크기가 자동으로 조정됩니다.
+                    DBSCAN 알고리즘으로 실제 밀집 지역 기반 클러스터링을 수행합니다.
+                    뷰포트 크기에 따라 묶는 반경(epsilon)이 자동 조정되어 줌 레벨에 맞게 클러스터가 나뉩니다.
 
                     ### 범위 제한
                     - 가로(`neLng - swLng`)와 세로(`neLat - swLat`) **각각** 0.27°(~30km) 이하
                     - 둘 중 하나라도 초과 시 400 반환
+
+                    ### 성별 필터
+                    - ALL: 전체, MALE: 남성, FEMALE: 여성 스레드만 클러스터링
 
                     ### 반환값
                     - lat, lng: 클러스터 내 스레드들의 평균 좌표
@@ -217,7 +220,7 @@ public class ThreadController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "조회 성공")
     })
-    @GetMapping("/map/dong")
+    @GetMapping("/map/clusters")
     public List<ClusterMarkerResponse> clusters(
             @Parameter(description = "bounding box 남서 위도", example = "37.40", required = true)
             @RequestParam double swLat,
@@ -229,8 +232,15 @@ public class ThreadController {
             @RequestParam double neLat,
 
             @Parameter(description = "bounding box 북동 경도", example = "127.10", required = true)
-            @RequestParam double neLng) {
-        return threadService.getClusters(swLat, swLng, neLat, neLng);
+            @RequestParam double neLng,
+
+            @Parameter(
+                    description = "성별 필터. ALL=전체, MALE=남, FEMALE=녀",
+                    required = true,
+                    schema = @Schema(allowableValues = {"ALL", "MALE", "FEMALE"})
+            )
+            @RequestParam Gender gender) {
+        return threadService.getClusters(swLat, swLng, neLat, neLng, gender);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")
