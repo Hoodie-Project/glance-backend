@@ -43,6 +43,10 @@ dependencies {
 	testAnnotationProcessor("org.projectlombok:lombok")
 }
 
+tasks.named<Jar>("jar") {
+	enabled = false
+}
+
 tasks.withType<Test> {
 	useJUnitPlatform()
 	// Colima mounts its Docker socket at a non-standard path; pass it to Testcontainers
