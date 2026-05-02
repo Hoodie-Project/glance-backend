@@ -7,6 +7,7 @@ import com.hoodiev.glance.common.exception.BoundingBoxTooLargeException;
 import com.hoodiev.glance.common.exception.EntityNotFoundException;
 import com.hoodiev.glance.common.exception.InvalidPasswordException;
 import com.hoodiev.glance.common.exception.RateLimitExceededException;
+import com.hoodiev.glance.common.util.DbscanClusterer;
 import com.hoodiev.glance.common.util.PasswordGenerator;
 import com.hoodiev.glance.common.util.RateLimiter;
 import com.hoodiev.glance.region.service.GeocodingService;
@@ -125,9 +126,10 @@ public class ThreadService {
 
     private static final double MAX_PINS_SPAN = 0.045;    // ~5km
     private static final double MAX_CLUSTER_SPAN = 0.27; // ~30km
-    private static final double CLUSTER_GRID_DIVISIONS = 10.0;
-    private static final double CLUSTER_GRID_MIN = 0.002;
-    private static final double CLUSTER_GRID_MAX = 0.1;
+    private static final double CLUSTER_EPSILON_DIVISIONS = 15.0;
+    private static final double CLUSTER_EPSILON_MIN = 0.001;
+    private static final double CLUSTER_EPSILON_MAX = 0.07;
+    private static final int CLUSTER_MIN_PTS = 1;
 
     public List<ThreadPinResponse> getPins(double swLat, double swLng, double neLat, double neLng, Gender gender) {
         if (neLat - swLat > MAX_PINS_SPAN || neLng - swLng > MAX_PINS_SPAN)
@@ -145,12 +147,17 @@ public class ThreadService {
         if (neLat - swLat > MAX_CLUSTER_SPAN || neLng - swLng > MAX_CLUSTER_SPAN)
             throw new BoundingBoxTooLargeException(MAX_CLUSTER_SPAN);
         double span = Math.max(neLat - swLat, neLng - swLng);
-        double gridSize = Math.clamp(span / CLUSTER_GRID_DIVISIONS, CLUSTER_GRID_MIN, CLUSTER_GRID_MAX);
-        return threadRepository.findClusters(swLat, swLng, neLat, neLng, gridSize).stream()
-                .map(row -> new ClusterMarkerResponse(
+        double epsilon = Math.clamp(span / CLUSTER_EPSILON_DIVISIONS, CLUSTER_EPSILON_MIN, CLUSTER_EPSILON_MAX);
+
+        List<DbscanClusterer.Point> points = threadRepository.findCoordinatesInBbox(swLat, swLng, neLat, neLng)
+                .stream()
+                .map(row -> new DbscanClusterer.Point(
                         ((Number) row[0]).doubleValue(),
-                        ((Number) row[1]).doubleValue(),
-                        ((Number) row[2]).longValue()))
+                        ((Number) row[1]).doubleValue()))
+                .toList();
+
+        return DbscanClusterer.cluster(points, epsilon, CLUSTER_MIN_PTS).stream()
+                .map(c -> new ClusterMarkerResponse(c.lat(), c.lng(), c.count()))
                 .toList();
     }
 
