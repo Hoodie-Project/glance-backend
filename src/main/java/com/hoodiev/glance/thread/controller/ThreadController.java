@@ -229,8 +229,15 @@ public class ThreadController {
             @RequestParam double neLat,
 
             @Parameter(description = "bounding box 북동 경도", example = "127.10", required = true)
-            @RequestParam double neLng) {
-        return threadService.getClusters(swLat, swLng, neLat, neLng, null);
+            @RequestParam double neLng,
+
+            @Parameter(
+                    description = "성별 필터. ALL=전체, MALE=남, FEMALE=녀",
+                    required = true,
+                    schema = @Schema(allowableValues = {"ALL", "MALE", "FEMALE"})
+            )
+            @RequestParam Gender gender) {
+        return threadService.getClusters(swLat, swLng, neLat, neLng, gender);
     }
 
     @Operation(summary = "스레드 상세 조회", description = "댓글 목록 포함 (오래된 순). Soft-deleted 스레드는 404.")

@@ -65,13 +65,15 @@ public interface ThreadRepository extends JpaRepository<Thread, Long> {
               AND longitude IS NOT NULL
               AND latitude BETWEEN :swLat AND :neLat
               AND longitude BETWEEN :swLng AND :neLng
+              AND (CAST(:gender AS VARCHAR) IS NULL OR gender = :gender)
             LIMIT 2000
             """, nativeQuery = true)
     List<Object[]> findCoordinatesInBbox(
             @Param("swLat") double swLat,
             @Param("swLng") double swLng,
             @Param("neLat") double neLat,
-            @Param("neLng") double neLng);
+            @Param("neLng") double neLng,
+            @Param("gender") String gender);
 
     @Query("""
             SELECT DISTINCT t FROM Thread t
